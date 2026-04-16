@@ -17,6 +17,11 @@ Examples:
 - After writing a file → read it back and confirm expected content is present.
 - After a git push → verify remote state with `git ls-remote` or equivalent.
 
+**Before merging a PR, review PR page comments and code review feedback from bots and agents, and address or explicitly disposition that feedback before merge.**
+
+Check: `gh pr view <number> --comments` and `gh pr reviews` before calling merge.
+For each bot/agent comment: fix, acknowledge with a reply, or explicitly record disposition in the PR or handoff.
+
 ---
 
 ## Git Workflow
