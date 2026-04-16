@@ -1,7 +1,9 @@
 import { useReducer } from 'react'
+import type React from 'react'
 import type { ThemeConfig } from './schema/theme'
 import { ThemeConfigSchema } from './schema/theme'
 import { DEFAULT_THEME } from './lib/theme/defaults'
+import { themeToStyleVars } from './lib/theme/applyTheme'
 import ThemeEditor from './components/ThemeEditor/ThemeEditor'
 import ThemePreview from './components/ThemePreview/ThemePreview'
 import styles from './App.module.css'
@@ -37,7 +39,7 @@ export default function App() {
   const [theme, dispatch] = useReducer(themeReducer, DEFAULT_THEME)
 
   return (
-    <div className={styles.app}>
+    <div className={styles.app} style={themeToStyleVars(theme) as React.CSSProperties}>
       <header className={styles.topbar}>
         <span className={styles.brand}>theme-forge</span>
       </header>

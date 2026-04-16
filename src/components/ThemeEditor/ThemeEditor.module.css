@@ -69,6 +69,6 @@
 
 .field input[type='range'] {
   flex: 1;
-  accent-color: #6366f1;
+  accent-color: var(--color-primary, #6366f1);
   max-width: 100px;
 }
