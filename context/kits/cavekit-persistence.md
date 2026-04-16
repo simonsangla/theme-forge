@@ -62,7 +62,7 @@ Long-lived storage of the user's working theme in browser local storage and inge
 **Dependencies:** cavekit-editor.md R9, cavekit-schema.md R6
 
 ### R6: Storage Schema Versioning
-**Description:** The persisted record must carry a version identifier so future schema changes can be migrated or detected.
+**Description:** The persisted record must carry a version identifier so future schema changes can be migrated or detected. Adding optional fields to the PersistedRecord wrapper (e.g., `colorMode` and `colorOverrides` per R8) does NOT bump the version; only field-shape changes that break legacy reads do.
 **Acceptance Criteria:**
 - [ ] Every persisted record includes a version field with a stable identifier for the current schema generation
 - [ ] On load, a record whose version matches the current generation is loaded normally (subject to R2)
@@ -76,6 +76,18 @@ Long-lived storage of the user's working theme in browser local storage and inge
 - [ ] If local storage is unavailable, save attempts (R1) are skipped silently after an initial visible non-blocking notice
 - [ ] The editor and preview remain fully functional in the absence of storage
 **Dependencies:** R1, R2
+
+### R8: Optional Color-Mode Fields on Persisted Record
+**Description:** The PersistedRecord may carry two optional fields — `colorMode` (a string equal to `'simple'` or `'advanced'`) and `colorOverrides` (a partial map of `ColorTokens` representing user-edited slot values applied on top of the Simple-mode-derived base). Both fields are omittable. The persistence schema generation (version) stays at 1; legacy records lacking these fields load as Simple mode with an empty override map. `ThemeConfigSchema` is NOT extended — these fields live on the PersistedRecord wrapper around the theme.
+**Acceptance Criteria:**
+- [ ] PersistedRecord shape accepts records with or without the `colorMode` and `colorOverrides` fields without error
+- [ ] At save time, when the editor is in Simple mode the record persists `colorMode='simple'` plus any active overrides; when in Advanced mode the record persists `colorMode='advanced'` plus the full override set
+- [ ] At load time, a missing `colorMode` field defaults to `'simple'` and a missing `colorOverrides` field defaults to `{}`
+- [ ] At load time, a `colorMode` value not in `{'simple','advanced'}` is treated as corrupt per R2 / R6 (visible non-blocking notice; default theme used)
+- [ ] At load time, every key in `colorOverrides` must be a valid color slot name and every value must satisfy hex-color validation; otherwise the record is treated as corrupt per R2 / R6
+- [ ] The schema generation (version) field remains 1; no migration is required
+- [ ] Round-trip preservation: saving then loading an unchanged record yields equal `colorMode` and equal `colorOverrides`
+**Dependencies:** R1, R2, R6, cavekit-editor.md R11
 
 ## Out of Scope
 - Cloud sync or any network-backed storage
@@ -95,3 +107,4 @@ Long-lived storage of the user's working theme in browser local storage and inge
 
 ## Changelog
 - 2026-04-16: Initial draft.
+- 2026-04-16: Batch B-arch — added R8 (optional `colorMode` + `colorOverrides` on PersistedRecord; no version bump). R6 clarified that wrapper-field additions don't bump version.

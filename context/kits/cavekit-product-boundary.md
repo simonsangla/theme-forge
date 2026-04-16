@@ -85,3 +85,4 @@ Adding, removing, or renaming any ID requires a dedicated PR that updates this r
 
 ## Changelog
 - 2026-04-16: Initial boundary lock. Catalog frozen at 11 IDs. Token surface expanded to include shadow + radius groups; out-of-scope list is hard-wall.
+- 2026-04-16: Batch B-arch — confirmed Simple/Advanced color mode falls under R1 capability "Theme design via interactive controls"; no R revision required. R1/R2/R3/R4 text unchanged.

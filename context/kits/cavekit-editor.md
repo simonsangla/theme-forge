@@ -11,7 +11,7 @@ The interactive control surface where the user adjusts theme tokens. Covers the 
 ## Requirements
 
 ### R1: Color Token Controls
-**Description:** The editor must expose one editable control per color slot defined by the schema. Each control must allow the user to set a valid hex color and reflect the current value.
+**Description:** The editor must expose one editable control per color slot defined by the schema. Each control must allow the user to set a valid hex color and reflect the current value. Control rendering is mode-aware per R11 (Simple shows 2 controls; Advanced shows all 9).
 **Acceptance Criteria:**
 - [ ] One control is rendered for each color slot in the active theme
 - [ ] Each control is labeled with the slot name in human-readable form
@@ -97,6 +97,20 @@ The interactive control surface where the user adjusts theme tokens. Covers the 
 - [ ] If no DESIGN.md exists, the editor uses the active theme's own tokens consistently across all controls
 **Dependencies:** none
 
+### R11: Color Mode (Simple / Advanced)
+**Description:** The editor must expose a Simple ↔ Advanced color-mode toggle. Simple mode renders exactly two color inputs (Primary, Neutral) and derives the remaining seven color slots deterministically from those two inputs (per the Batch A handoff rule: secondary = primary hue-shifted +40°; background, text, muted, hairline, inkSoft, surfaceInvert, onInvert derived from neutral via fixed L values; exact derivation values are intentionally left to the implementation cavekit-revision or to the implementation batch). Advanced mode renders all nine color controls with no derivation, each independently editable. Switching Advanced→Simple discards manual overrides for the seven derived slots and resumes derivation. Switching Simple→Advanced seeds the nine controls with the currently displayed (derived) values, treated as overrides going forward. The mode is persisted across sessions via cavekit-persistence.md R8.
+**Acceptance Criteria:**
+- [ ] Default mode on first load (no persisted record) is Simple
+- [ ] A mode toggle affordance is rendered and operable
+- [ ] In Simple mode, exactly two color controls are rendered (Primary, Neutral)
+- [ ] In Simple mode, changing Primary updates the secondary slot deterministically — the same Primary value always yields the same secondary value
+- [ ] In Simple mode, changing Neutral updates background, text, muted, hairline, inkSoft, surfaceInvert, and onInvert deterministically
+- [ ] In Advanced mode, all nine color controls are rendered and independently editable, with no derivation applied to any slot
+- [ ] Switching from Advanced to Simple is recorded as a single undoable change (R7) and discards override state for the seven derived slots
+- [ ] Switching from Simple to Advanced is recorded as a single undoable change (R7) and seeds the nine controls with the current derived values as overrides
+- [ ] Mode is persisted across sessions per cavekit-persistence.md R8
+**Dependencies:** R6, R7, cavekit-schema.md R1, cavekit-persistence.md R8
+
 ## Out of Scope
 - Live preview rendering (Preview domain)
 - Theme serialization to any export format (Export domain)
@@ -116,3 +130,4 @@ The interactive control surface where the user adjusts theme tokens. Covers the 
 
 ## Changelog
 - 2026-04-16: Initial draft.
+- 2026-04-16: Batch B-arch — added R11 Color Mode (Simple/Advanced); R1 annotated as mode-aware.
