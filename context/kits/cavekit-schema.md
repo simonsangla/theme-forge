@@ -11,9 +11,9 @@ Defines the canonical data model for a theme: token groups (color, typography, s
 ## Requirements
 
 ### R1: Color Token Group
-**Description:** A theme must define a color token group containing the named slots required by the editor: primary, secondary, background, and text. Each slot holds a single color value expressed as a hex string.
+**Description:** A theme must define a color token group containing the named slots required by the editor and widget previews. Each slot holds a single color value expressed as a hex string.
 **Acceptance Criteria:**
-- [ ] A color token group object contains exactly the slots: primary, secondary, background, text
+- [ ] The group contains exactly the slots: primary, secondary, background, text, muted, hairline, inkSoft, surfaceInvert, onInvert
 - [ ] Each slot value is a string matching a valid 6-digit hex color pattern with leading hash
 - [ ] Validation rejects values that are not valid hex colors (wrong length, missing hash, non-hex characters)
 - [ ] Validation rejects color groups missing any required slot
@@ -40,16 +40,18 @@ Defines the canonical data model for a theme: token groups (color, typography, s
 **Dependencies:** none
 
 ### R4: Theme Configuration
-**Description:** A theme configuration must compose the three token groups under a human-readable name.
+**Description:** A theme configuration must compose the token groups under a human-readable name.
 **Acceptance Criteria:**
-- [ ] The configuration contains exactly the fields: name, colors, typography, spacing
+- [ ] The configuration contains exactly the fields: name, colors, typography, spacing, shadows, radii
 - [ ] name is a non-empty string
 - [ ] colors satisfies the color token group requirements (R1)
 - [ ] typography satisfies the typography token group requirements (R2)
 - [ ] spacing satisfies the spacing token group requirements (R3)
+- [ ] shadows satisfies the shadow token group requirements (R8)
+- [ ] radii satisfies the radius token group requirements (R9)
 - [ ] Validation produces a structured error report identifying the failing field path when any sub-validation fails
 - [ ] An unknown top-level field on the configuration causes validation to fail
-**Dependencies:** R1, R2, R3
+**Dependencies:** R1, R2, R3, R8, R9
 
 ### R5: Theme Variant Pair
 **Description:** A theme may be expressed as a paired set of two theme configurations representing a light variant and a dark variant. The pair shares typography and spacing values; only color tokens differ between the two.
@@ -59,6 +61,8 @@ Defines the canonical data model for a theme: token groups (color, typography, s
 - [ ] light and dark each satisfy the theme configuration requirements (R4)
 - [ ] Validation rejects a pair when light and dark have differing typography values
 - [ ] Validation rejects a pair when light and dark have differing spacing values
+- [ ] Validation rejects a pair when light and dark have differing shadows values
+- [ ] Validation rejects a pair when light and dark have differing radii values
 - [ ] Validation produces a structured error identifying which group diverged when the equality check fails
 - [ ] A single (non-pair) theme configuration remains independently valid and is not required to be wrapped in a pair
 **Dependencies:** R4
@@ -78,7 +82,30 @@ Defines the canonical data model for a theme: token groups (color, typography, s
 - [ ] A constant default theme is exported and passes validation under R4
 - [ ] The default theme name is a non-empty human-readable string
 - [ ] The default theme values are stable across reads (immutable / not modifiable by consumers)
+- [ ] The default theme includes shadows and radii values that satisfy R8 and R9
 **Dependencies:** R4
+
+### R8: Shadow Token Group
+**Description:** A theme must define a shadow token group with four named CSS box-shadow strings used by widget previews and emitted into every export.
+**Acceptance Criteria:**
+- [ ] The group contains exactly the slots: primary, secondary, card, float
+- [ ] Each slot value is a non-empty string conforming to CSS box-shadow syntax (one or more layers separated by commas; each layer is offsets + optional blur + optional spread + color, with optional inset prefix)
+- [ ] Validation rejects empty strings or non-string values
+- [ ] Validation rejects shadow groups missing any required slot
+- [ ] Validation rejects shadow groups containing slots not in the required set
+**Dependencies:** none
+
+### R9: Radius Token Group
+**Description:** A theme must define a radius token group with five named pixel-radius values used by widget previews and emitted into every export.
+**Acceptance Criteria:**
+- [ ] The group contains exactly the slots: pill, sm, md, lg, xl
+- [ ] pill is a non-negative number representing the pixel radius for fully-rounded shapes; the implementation may interpret a sentinel (e.g., 9999) as "fully round"
+- [ ] sm, md, lg, xl are non-negative numbers in ascending order (sm <= md <= lg <= xl)
+- [ ] All values are in the inclusive range 0 through 9999
+- [ ] Validation rejects values outside the stated range, non-numeric inputs, and groups violating the ascending-order constraint
+- [ ] Validation rejects radius groups missing any required slot
+- [ ] Validation rejects radius groups containing slots not in the required set
+**Dependencies:** none
 
 ## Out of Scope
 - UI rendering of tokens (Editor domain)
@@ -87,15 +114,18 @@ Defines the canonical data model for a theme: token groups (color, typography, s
 - Storage and loading of themes (Persistence domain)
 - Color contrast or accessibility scoring
 - Token aliases, semantic token layers, or per-component token overrides
-- Animation, motion, border-radius, shadow, or breakpoint tokens
+- Animation, motion, or breakpoint tokens
 - Internationalization of token names
 - Multiple font families per theme
 
 ## Cross-References
+- See also: cavekit-product-boundary.md (token surface scope)
 - See also: cavekit-editor.md (consumes default theme and validation)
 - See also: cavekit-preview.md (consumes theme configuration and variant pair)
 - See also: cavekit-export.md (consumes theme configuration)
 - See also: cavekit-persistence.md (consumes validation for imported themes)
+- See also: cavekit-widgets.md (widget previews consume the token surface)
 
 ## Changelog
 - 2026-04-16: Initial draft.
+- 2026-04-16: Boundary revision (Batch 9). Color group extended to 9 slots (added muted, hairline, inkSoft, surfaceInvert, onInvert). Added shadow token group (R8) and radius token group (R9). Theme configuration and variant pair validation updated to compose them.
