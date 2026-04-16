@@ -1,4 +1,4 @@
-import { ThemeConfig, ThemeConfigSchema } from '../schema/theme'
+import { type ThemeConfig, ThemeConfigSchema } from '../schema/theme'
 
 export function toJSON(config: ThemeConfig): string {
   ThemeConfigSchema.parse(config)
