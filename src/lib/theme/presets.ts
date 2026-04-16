@@ -47,4 +47,13 @@ export const PRESETS: readonly { label: string; theme: ThemeConfig }[] = [
       spacing: { baseUnitPx: 4 },
     },
   },
+  {
+    label: 'Pays Basque',
+    theme: {
+      name: 'Pays Basque',
+      colors: { primary: '#c8102e', secondary: '#0a6b3b', background: '#fdf6ee', text: '#1a1a1a' },
+      typography: { fontFamily: 'Georgia, serif', baseSizePx: 16, scaleRatio: 1.25 },
+      spacing: { baseUnitPx: 4 },
+    },
+  },
 ] as const
