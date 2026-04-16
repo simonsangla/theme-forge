@@ -105,39 +105,32 @@ describe('WidgetSelector — preview-card surface', () => {
 describe('WidgetSelector — kpi-tile variant toggle (T-134/T-135)', () => {
   it('renders the kpi-tile variant toggle with two pressable options', () => {
     render(<Harness />)
-    const tileBtn = screen.getByRole('button', { name: /kpi-tile tile variant/i })
-    const metricBtn = screen.getByRole('button', { name: /kpi-tile metric variant/i })
-    expect(tileBtn).toBeInTheDocument()
-    expect(metricBtn).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Tile variant' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Metric variant' })).toBeInTheDocument()
   })
 
   it('defaults to tile variant on mount (Tile pressed, Metric not)', () => {
     render(<Harness />)
-    const tileBtn = screen.getByRole('button', { name: /kpi-tile tile variant/i })
-    const metricBtn = screen.getByRole('button', { name: /kpi-tile metric variant/i })
-    expect(tileBtn).toHaveAttribute('aria-pressed', 'true')
-    expect(metricBtn).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: 'Tile variant' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Metric variant' })).toHaveAttribute('aria-pressed', 'false')
   })
 
-  it('clicking Metric flips aria-pressed and changes the kpi-tile preview', async () => {
+  it('clicking Metric flips aria-pressed and switches preview to data-variant="metric"', async () => {
     const user = userEvent.setup()
     const { container } = render(<Harness />)
-    const before = container.querySelector('[data-widget-preview="kpi-tile"]')!.outerHTML
-    await user.click(screen.getByRole('button', { name: /kpi-tile metric variant/i }))
-    const tileBtn = screen.getByRole('button', { name: /kpi-tile tile variant/i })
-    const metricBtn = screen.getByRole('button', { name: /kpi-tile metric variant/i })
-    expect(tileBtn).toHaveAttribute('aria-pressed', 'false')
-    expect(metricBtn).toHaveAttribute('aria-pressed', 'true')
-    const after = container.querySelector('[data-widget-preview="kpi-tile"]')!.outerHTML
-    expect(after).not.toBe(before)
+    expect(container.querySelector('[data-widget-preview="kpi-tile"]')).toHaveAttribute('data-variant', 'tile')
+    await user.click(screen.getByRole('button', { name: 'Metric variant' }))
+    expect(screen.getByRole('button', { name: 'Tile variant' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: 'Metric variant' })).toHaveAttribute('aria-pressed', 'true')
+    expect(container.querySelector('[data-widget-preview="kpi-tile"]')).toHaveAttribute('data-variant', 'metric')
   })
 
-  it('clicking the variant toggle does NOT toggle the kpi-tile selection switch', async () => {
+  it('clicking the variant toggle does NOT change the kpi-tile selection (sibling structure isolates events)', async () => {
     const user = userEvent.setup()
     let latest: WidgetSelection = DEFAULT_WIDGET_SELECTION
     render(<Harness onSelectionChange={s => { latest = s }} />)
     const before = latest['kpi-tile']
-    await user.click(screen.getByRole('button', { name: /kpi-tile metric variant/i }))
+    await user.click(screen.getByRole('button', { name: 'Metric variant' }))
     expect(latest['kpi-tile']).toBe(before)
   })
 
@@ -146,6 +139,20 @@ describe('WidgetSelector — kpi-tile variant toggle (T-134/T-135)', () => {
     // exactly one variant-toggle row in the entire selector
     const toggles = container.querySelectorAll('[data-testid="kpi-tile-variant-toggle"]')
     expect(toggles).toHaveLength(1)
+  })
+
+  // T-146 / cavekit-widgets R4 (revised) — toggle is operable regardless of selection state
+  it('renders + responds to clicks even when kpi-tile is excluded from selection', async () => {
+    const user = userEvent.setup()
+    const allOff: WidgetSelection = { ...DEFAULT_WIDGET_SELECTION }
+    const { container } = render(<Harness initial={allOff} />)
+    // kpi-tile is unselected
+    expect(screen.getByRole('switch', { name: 'KPI tile' })).toHaveAttribute('aria-checked', 'false')
+    // variant toggle still rendered
+    expect(container.querySelectorAll('[data-testid="kpi-tile-variant-toggle"]')).toHaveLength(1)
+    // and still operable
+    await user.click(screen.getByRole('button', { name: 'Metric variant' }))
+    expect(container.querySelector('[data-widget-preview="kpi-tile"]')).toHaveAttribute('data-variant', 'metric')
   })
 })
 

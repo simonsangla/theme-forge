@@ -55,6 +55,7 @@ The widget manifest layer: a fixed catalog of UI widgets that the user toggles f
 - [ ] Only the kpi-tile preview exposes a variant toggle; no other widget gains per-widget configuration UI
 - [ ] The toggle has accessible labels for both states (Tile / Metric) and reflects the active variant via aria-pressed or aria-checked
 - [ ] The variant choice is per-session (not persisted to localStorage) and does not appear in any export format
+- [ ] The variant toggle is rendered alongside the kpi-tile card whenever the card is rendered, regardless of whether kpi-tile is included in the current selection (the toggle controls preview rendering, not export inclusion)
 - [ ] Previews never trigger network, storage, or DOM-mutation side effects
 **Dependencies:** R1, cavekit-product-boundary R4
 
@@ -97,3 +98,4 @@ The widget manifest layer: a fixed catalog of UI widgets that the user toggles f
 ## Changelog
 - 2026-04-16: Initial cavekit. Backfills shipped 8-widget surface; extends catalog to 11 (adds badge, pricing-card, testimonial). kpi-tile gains a "metric" visual variant absorbing the proposed metric-stat widget.
 - 2026-04-16 (Batch 10): R4 clarified — kpi-tile metric variant is user-selectable via an in-card toggle (transient per-session, not persisted, not in export). Codifies the boundary that no other widget exposes per-widget configuration UI.
+- 2026-04-16 (Batch 11): R4 codifies that the variant toggle is operable regardless of kpi-tile selection state (matches shipped behavior).

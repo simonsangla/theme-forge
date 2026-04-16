@@ -70,13 +70,24 @@ describe('toCSSVars — new token emission', () => {
 })
 
 describe('toCSSVarsVariant — new token emission', () => {
-  it('emits new color/shadow/radius vars in both :root and :root[data-theme="dark"] blocks', () => {
+  it('emits the dark selector and a light :root selector', () => {
     const out = toCSSVarsVariant(variantPair)
     expect(out).toContain(':root {')
     expect(out).toContain(':root[data-theme="dark"] {')
+  })
+
+  // T-145 / F-004 — both blocks must individually carry every new var
+  it('emits every new color/shadow/radius var in BOTH the light AND dark blocks (split-and-check)', () => {
+    const out = toCSSVarsVariant(variantPair)
+    const darkSelector = ':root[data-theme="dark"] {'
+    const splitIdx = out.indexOf(darkSelector)
+    expect(splitIdx).toBeGreaterThan(-1)
+    const lightHalf = out.slice(0, splitIdx)
+    const darkHalf = out.slice(splitIdx)
+
     for (const name of [...NEW_COLOR_VAR_NAMES, ...SHADOW_VAR_NAMES, ...RADIUS_VAR_NAMES]) {
-      // appears at least once in light or dark block — both blocks cite the same vars
-      expect(out).toContain(name)
+      expect(lightHalf, `light block must contain ${name}`).toContain(name)
+      expect(darkHalf, `dark block must contain ${name}`).toContain(name)
     }
   })
 })

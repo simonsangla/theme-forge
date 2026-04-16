@@ -1,5 +1,54 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch 11 — Nit-pick cleanup (Batch 10 inspector findings)
+
+**Date:** 2026-04-16
+**Status:** Complete. Closes 2 P2 + 4 P3 + 2 cavekit clarifications surfaced by Batch 10 inspect.
+
+### Scope
+
+Eight tasks T-140..T-147 across 2 tiers, all from the Batch 10 inspector report:
+
+| Origin | Task | Resolution |
+|---|---|---|
+| F-001 (P2) | T-140, T-147 | Removed dead `e.stopPropagation()` and misleading comment from variant click handler. Test reworded to credit the structural sibling separation rather than propagation suppression. |
+| F-002 (P2) | T-143 | Replaced theatrical render-only assertion with a real CSS-consumption test that scans `WidgetPreview.module.css` and proves every theme color slot is referenced via `var(--token)` somewhere — catches token-drop regressions. |
+| F-003 (P3) | T-144 | Replaced loose `outerHTML !== outerHTML` comparison with specific `data-variant="metric"` attribute assertion. |
+| F-004 (P3) | T-145 | Split `toCSSVarsVariant` output on `:root[data-theme="dark"] {` and assert each new var appears in BOTH halves. Catches future regression where dark block omits a token. |
+| F-005 (P3) | T-141 | Variant `aria-label` simplified from `"kpi-tile <v> variant"` to `"<V> variant"` (Tile variant / Metric variant) — cleaner SR announcement. |
+| F-006 (P3) | T-146 | Cavekit-widgets R4 codified that variant toggle is operable regardless of selection; new test asserts toggle renders + responds when kpi-tile selection is false. |
+| Cavekit-schema R8 (revised) | T-142 | New backslash-exemption acceptance criterion + 3 tests proving CSS hex escapes (`\3b` etc.) load successfully and don't break declaration boundaries (CSS Syntax Level 3 decodes inside value token after declaration parsing). |
+
+### Cavekit revisions
+
+- **cavekit-schema R8** — added explicit acceptance criterion: backslash is intentionally NOT in the blocklist; CSS hex escapes are decoded after declaration parsing per CSS Syntax Level 3 and cannot break the declaration boundary. Test mandate added.
+- **cavekit-widgets R4** — added acceptance criterion: variant toggle renders + remains interactive regardless of kpi-tile selection state (codifies shipped behavior).
+
+### Validation
+
+| Gate | Result |
+|---|---|
+| Lint | 0 errors |
+| Typecheck | pass |
+| Test | 267/267 pass (261 prior + 6 new across 3 files) |
+| Build | pass (vite ~99ms; 18.09kB CSS / 293kB JS) |
+| CI | (pending — see PR) |
+
+### Browser verification
+
+- Variant toggle now reads "Tile" / "Metric" with simplified `aria-label="Tile variant"` / `"Metric variant"`
+- Clicking Metric flips `aria-pressed`, switches preview `data-variant` to `metric`
+- Old `aria-label="kpi-tile tile variant"` no longer present (regression check passes)
+
+### Next recommended batch
+
+The repo is in a notably clean state: 3 boundary-locked cavekits, 11-widget catalog, 9-color/4-shadow/5-radius token surface, full back-compat on persistence, hardened shadow-injection guard. Two non-overlapping next directions:
+
+1. **Variant-pair authoring UI.** Schema + persistence already support `ThemeVariantPair` with shared shadows/radii. Add light/dark editor toggle and a variant-aware export selector. Closes the dark-mode export story.
+2. **Accessibility audit pass.** With 9 color pickers, 4 shadow textareas, 5 radius inputs, 11 widget cards, and the new variant toggle, the editor surface has grown enough to warrant formal WCAG AA review (color contrast, keyboard nav, SR announcements). Would need a small cavekit addition to scope it — boundary R1 doesn't include accessibility explicitly.
+
+---
+
 ## Batch 10 — Follow-up: Shadow Safety + Coverage GAPs + KPI Variant UX
 
 **Date:** 2026-04-16
