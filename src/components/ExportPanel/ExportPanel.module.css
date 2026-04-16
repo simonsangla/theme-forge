@@ -1,0 +1,84 @@
+.panel {
+  background: #1e1e2e;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+}
+
+/* ── Format tabs ─────────────────────────────── */
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 1px solid #2e2e3e;
+  padding: 8px 8px 0;
+}
+
+.tab {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6c6c8a;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  transition: color 0.1s;
+}
+
+.tab:hover {
+  color: #cdd6f4;
+}
+
+.tabActive {
+  color: #cdd6f4;
+  border-bottom-color: #8b5cf6;
+}
+
+/* ── Actions ─────────────────────────────────── */
+
+.actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2e2e3e;
+}
+
+.actionBtn {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid #3e3e5e;
+  border-radius: 4px;
+  background: #2e2e3e;
+  color: #cdd6f4;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.actionBtn:hover {
+  background: #3e3e5e;
+}
+
+/* ── Monospaced output ───────────────────────── */
+
+.code {
+  padding: 14px 16px;
+  font-size: 11px;
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  color: #a6e3a1;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}

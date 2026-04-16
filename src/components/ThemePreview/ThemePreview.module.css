@@ -1,26 +1,29 @@
+/* Chrome — neutral, distinct from theme tokens (T-021 / R6) */
 .preview {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 560px;
+  max-width: 600px;
 }
 
+/* Canvas — tokens scoped here via inline style (T-017 / R1) */
 .canvas {
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid #e5e5e5;
   background: var(--color-background);
   font-family: var(--font-family);
-  font-size: var(--font-size-base);
   color: var(--color-text);
 }
 
+/* App bar using primary color */
 .bar {
   height: 44px;
   background: var(--color-primary);
   display: flex;
   align-items: center;
   padding: 0 16px;
+  flex-shrink: 0;
 }
 
 .barTitle {
@@ -34,8 +37,33 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
+
+/* ── Type scale ─────────────────────────────────────────────────── */
+
+.typeScale {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Spacing visualization ──────────────────────────────────────── */
+
+.spacingDemo {
+  display: flex;
+  align-items: center;
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.spBlock {
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Component card ─────────────────────────────────────────────── */
 
 .card {
   background: var(--color-background);
@@ -44,87 +72,73 @@
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .cardTitle {
-  font-size: calc(var(--font-size-base) * 1.15);
+  font-size: var(--font-size-base, 16px);
   font-weight: 600;
   color: var(--color-text);
   margin: 0;
 }
 
 .cardBody {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-base, 16px);
   color: var(--color-text);
   opacity: 0.7;
   line-height: 1.5;
   margin: 0;
 }
 
-.btn {
-  align-self: flex-start;
-  padding: calc(var(--spacing-base) * 2) calc(var(--spacing-base) * 4);
+.btnRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Primary button */
+.btnPrimary {
+  padding: calc(var(--spacing-1, 4px) * 2) calc(var(--spacing-1, 4px) * 4);
   background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 4px;
-  font-size: calc(var(--font-size-base) * 0.875);
+  font-size: 14px;
   font-family: var(--font-family);
   cursor: pointer;
   font-weight: 500;
-  line-height: 1.4;
 }
 
-.btn:hover {
+.btnPrimary:hover {
   opacity: 0.9;
 }
 
+/* Secondary button */
+.btnSecondary {
+  padding: calc(var(--spacing-1, 4px) * 2) calc(var(--spacing-1, 4px) * 4);
+  background: transparent;
+  color: var(--color-secondary);
+  border: 1.5px solid var(--color-secondary);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: var(--font-family);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btnSecondary:hover {
+  background: var(--color-secondary);
+  color: #fff;
+}
+
 .input {
-  padding: calc(var(--spacing-base) * 2) calc(var(--spacing-base) * 3);
+  padding: calc(var(--spacing-1, 4px) * 2) calc(var(--spacing-1, 4px) * 3);
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 4px;
-  font-size: calc(var(--font-size-base) * 0.875);
+  font-size: 14px;
   font-family: var(--font-family);
   background: var(--color-background);
   color: var(--color-text);
   width: 100%;
   box-sizing: border-box;
-}
-
-.caption {
-  font-size: calc(var(--font-size-base) * 0.75);
-  color: var(--color-text);
-  opacity: 0.5;
-  margin: 0;
-}
-
-.export {
-  background: #1e1e2e;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.exportSummary {
-  padding: 10px 14px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #888;
-  cursor: pointer;
-  user-select: none;
-  list-style: none;
-}
-
-.exportCode {
-  padding: 12px 14px;
-  font-size: 11px;
-  font-family: ui-monospace, monospace;
-  color: #a6e3a1;
-  line-height: 1.6;
-  overflow-x: auto;
-  white-space: pre;
-  border-top: 1px solid #2e2e3e;
-  margin: 0;
 }

@@ -84,11 +84,11 @@ export type ValidationFailure = {
 }
 export type ValidationResult<T> = ValidationSuccess<T> | ValidationFailure
 
-function toResult<T>(parsed: z.SafeParseReturnType<unknown, T>): ValidationResult<T> {
+function toResult<T>(parsed: { success: true; data: T } | { success: false; error: z.ZodError }): ValidationResult<T> {
   if (parsed.success) return { success: true, data: parsed.data }
   return {
     success: false,
-    errors: parsed.error.issues.map((issue) => ({
+    errors: parsed.error.issues.map((issue: z.core.$ZodIssue) => ({
       path: issue.path.join('.'),
       message: issue.message,
     })),
