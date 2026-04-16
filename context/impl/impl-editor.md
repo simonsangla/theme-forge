@@ -10,11 +10,11 @@ Build site: context/plans/build-site.md
 |------|--------|-------|
 | T-008 | DONE | useThemeStore: single source of truth, validation gate, updateColors/Typography/Spacing/Name |
 | T-009 | DONE | 50-entry undo/redo stack, cold-load=initial state, user import=undoable; 18 tests |
-| T-010 | TODO | Color token controls |
-| T-011 | TODO | Typography controls |
-| T-012 | TODO | Spacing controls |
-| T-013 | TODO | Theme name control |
-| T-014 | TODO | Preset library |
-| T-015 | TODO | Reset to default action |
-| T-016 | TODO | External theme adoption |
+| T-010 | DONE | 4 color controls (picker+hex text), error surface per slot; secondary included |
+| T-011 | DONE | fontFamily select, baseSizePx range, scaleRatio range; per-field error surface |
+| T-012 | DONE | baseUnitPx range, error surface |
+| T-013 | DONE | Theme name text input, pre-filled, empty rejected |
+| T-014 | DONE | 5 presets (Ocean, Dark, Warm, Forest, Slate), validate on apply, undoable via commitTheme |
+| T-015 | DONE | Reset button → commitTheme(DEFAULT_THEME) — undoable |
+| T-016 | DONE | onAdoptTheme prop passes to commitTheme; validates + errors surfaced in App |
 | T-061 | DONE | App.tsx applies themeToStyleVars() CSS vars; editor accent-color uses var(--color-primary) |
