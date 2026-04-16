@@ -1,5 +1,34 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch 5 — Instruction Updates: Dependabot Preflight + Widened Merge Review
+
+**Date:** 2026-04-16
+**Merged commit:** `a1a5287313d8913f0c6e3196001b9a8d65a7f621` (PR #15)
+**Status:** Complete. All four gates green.
+
+### What was done
+
+Two new rules added to both instruction surfaces (AGENTS.md + external repo-bootstrap SKILL.md), plus a storage-location note to the skill:
+
+1. **Dependabot preflight** — before any batch, run `gh pr list --author app/dependabot --state open` and resolve/disposition any that affect the current work.
+2. **Widened merge review rule** — from "PR comments + bot/agent feedback" to "PR comments, formal reviews, bot/agent code review feedback, AND relevant automated review findings (CodeQL, Copilot, Dependabot, Snyk annotations)". Sources: `gh pr view --comments`, `gh pr view --json reviews`, `gh pr checks`.
+3. **Storage note (skill only)** — canonical is `~/.claude/skills/repo-bootstrap/SKILL.md` (local shared skills dir for this machine); versioned shared skills repo flagged as future migration candidate for portability and change history.
+
+### Evidence from this batch
+
+Dependabot PRs #1–#5 are currently open on this repo (predating batch 3). None affected this instruction-only edit, but they validate the new preflight rule's value and should be addressed before Batch 3 product work.
+
+### Files changed
+
+- `AGENTS.md` — Dependabot preflight section + widened merge review rule
+- `~/.claude/skills/repo-bootstrap/SKILL.md` (external) — same two rules + storage-location note in §9
+
+### Next action
+
+Before Batch 3 product work: address or disposition the 5 open Dependabot PRs (#1–#5).
+
+---
+
 ## Batch 4 — Skill Storage Boundary Correction
 
 **Date:** 2026-04-16
