@@ -4,14 +4,27 @@ const hexColor = z
   .string()
   .regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid 6-digit hex color (e.g. #aabbcc)')
 
-// CSS box-shadow string — non-empty.
-// Splitting on commas to validate each layer is unsafe because rgba()/hsla()
-// values contain commas. Zod is for shape, not exhaustive CSS validation —
-// we accept any non-empty string and trust CSS to render-or-fail at runtime.
-// Special-case 'none' is valid CSS and supported here.
+/**
+ * CSS box-shadow string validator (T-130, cavekit-schema R8 revised).
+ *
+ * Rejects characters that would let an untrusted shadow value escape its
+ * declaration in CSS / SCSS / Tailwind exports. Without this guard, an
+ * imported theme with a value like `red; } body { color: red` would close
+ * the `:root { ... }` block prematurely and inject arbitrary CSS into the
+ * emitted artifact.
+ *
+ * We do NOT attempt full CSS box-shadow grammar validation (rgba()/hsla()
+ * values contain commas, parens etc.). The character blocklist is the
+ * minimum sufficient guard for the export-time interpolation paths.
+ */
+const SHADOW_INJECTION_BLOCKLIST = /[;}{<>\n\r]|\/\*|\*\//
 const cssShadow = z
   .string()
   .min(1, 'shadow value must be a non-empty string')
+  .refine(
+    (s) => !SHADOW_INJECTION_BLOCKLIST.test(s),
+    'shadow value contains forbidden characters (; } { < > newline /* */) — would break out of CSS/SCSS export declarations',
+  )
 
 // T-100 — Color token group (R1 expanded): 9 slots, hex validation, rejects extras
 export const ColorTokenSchema = z

@@ -1,5 +1,61 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch 10 — Follow-up: Shadow Safety + Coverage GAPs + KPI Variant UX
+
+**Date:** 2026-04-16
+**Status:** Complete. Closes the 1 P1 + 2 GAPs surfaced by the Batch 9 inspect phase.
+
+### Scope
+
+Six tasks (T-130..T-135) addressing the Batch 9 inspector's REVISE verdict:
+
+| Task | Title | Closes |
+|---|---|---|
+| T-130 | Tighten `cssShadow` validator: reject `;` `}` `{` `/*` `*/` newlines `<` `>` | P1 CSS injection |
+| T-131 | Per-format export-emission tests for all new color/shadow/radius tokens | GAP #2 |
+| T-132 | Integration tests: `toJSON` round-trip preserves shadows + radii through persistence; preset apply re-themes downstream `WidgetPreview` | GAP #1 |
+| T-133 | Shadow injection regression test: 8 malicious payloads in persisted shadow values rejected as corrupt | P1 + cavekit-schema R8 (revised) |
+| T-134 | kpi-tile in-card variant toggle (Tile / Metric pills, transient per-session, accessible) | T-132 P2 |
+| T-135 | WidgetSelector behavior tests for the variant toggle (aria-pressed, click flips, switch isolation, single-widget scope) | T-132 P2 |
+
+### Cavekit revisions
+
+- **cavekit-schema R8** — clarified to mandate the character blocklist (`;` `}` `{` `/*` `*/` `\n` `\r` `<` `>`) as the explicit security contract. Rationale documented in the requirement description.
+- **cavekit-widgets R4** — clarified the kpi-tile metric variant is user-selectable via an in-card toggle (transient, not persisted, not in export). Codifies that no other widget gains per-widget configuration UI.
+
+### Implementation notes
+
+- `cssShadow` validator now uses a single regex `[;}{<>\n\r]|\/\*|\*\/` — minimum sufficient guard; multi-layer rgba/hsla strings still accepted because the blocklist doesn't include `(` `)` or `,`.
+- `WidgetSelector` gained local `kpiVariant: 'tile' | 'metric'` state; passes through to `WidgetPreview` only for kpi-tile. `e.stopPropagation()` on toggle clicks prevents the parent switch from flipping.
+- `toggle` button uses `aria-pressed` (not `aria-checked`) since it's a toggle button, not a switch.
+- Shadow injection tests cover 8 distinct payloads (semicolon escape, brace open/close, comment open/close, newline, angle brackets) — each asserts `loadTheme` returns `corrupt` status.
+
+### Validation
+
+| Gate | Result |
+|---|---|
+| Lint | 0 errors |
+| Typecheck | pass |
+| Test | 261/261 (220 prior + 41 new) |
+| Build | pass (vite ~107ms; 18.09kB CSS / 293kB JS) |
+| CI | (pending — see PR) |
+
+### Browser verification
+
+- Tile / Metric pill toggle visible below the kpi-tile card
+- Default state: Tile pressed (filled with primary color), Metric outlined
+- Click Metric → toggle flips, kpi-tile preview switches to top-hairline serif "1,284" / "ACTIVE USERS" rendering
+- Switch role="switch" on the kpi-tile card itself NOT toggled by variant clicks (event isolation working)
+
+### Next recommended batch
+
+Two viable directions (pick one):
+
+1. **Accessibility audit pass.** The 11 widget previews and editor controls have grown — formal WCAG AA review (color contrast against actual theme tokens, keyboard navigation through 9 color pickers + 4 shadow textareas + 5 radius inputs + 11 widget cards + variant toggle, screen-reader announcements). Boundary R1 doesn't include accessibility explicitly; would need a small cavekit addition to scope it.
+2. **Variant-pair authoring UI.** Schema + persistence already support `ThemeVariantPair` with shared shadows/radii. Only the light/dark editor surface and a variant-aware export selector are missing. Closes the dark-mode export story.
+
+---
+
 ## Batch 9 — Boundary Revision: Token Surface + Catalog Expansion
 
 **Date:** 2026-04-16

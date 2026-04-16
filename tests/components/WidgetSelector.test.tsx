@@ -102,6 +102,53 @@ describe('WidgetSelector — preview-card surface', () => {
   })
 })
 
+describe('WidgetSelector — kpi-tile variant toggle (T-134/T-135)', () => {
+  it('renders the kpi-tile variant toggle with two pressable options', () => {
+    render(<Harness />)
+    const tileBtn = screen.getByRole('button', { name: /kpi-tile tile variant/i })
+    const metricBtn = screen.getByRole('button', { name: /kpi-tile metric variant/i })
+    expect(tileBtn).toBeInTheDocument()
+    expect(metricBtn).toBeInTheDocument()
+  })
+
+  it('defaults to tile variant on mount (Tile pressed, Metric not)', () => {
+    render(<Harness />)
+    const tileBtn = screen.getByRole('button', { name: /kpi-tile tile variant/i })
+    const metricBtn = screen.getByRole('button', { name: /kpi-tile metric variant/i })
+    expect(tileBtn).toHaveAttribute('aria-pressed', 'true')
+    expect(metricBtn).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('clicking Metric flips aria-pressed and changes the kpi-tile preview', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<Harness />)
+    const before = container.querySelector('[data-widget-preview="kpi-tile"]')!.outerHTML
+    await user.click(screen.getByRole('button', { name: /kpi-tile metric variant/i }))
+    const tileBtn = screen.getByRole('button', { name: /kpi-tile tile variant/i })
+    const metricBtn = screen.getByRole('button', { name: /kpi-tile metric variant/i })
+    expect(tileBtn).toHaveAttribute('aria-pressed', 'false')
+    expect(metricBtn).toHaveAttribute('aria-pressed', 'true')
+    const after = container.querySelector('[data-widget-preview="kpi-tile"]')!.outerHTML
+    expect(after).not.toBe(before)
+  })
+
+  it('clicking the variant toggle does NOT toggle the kpi-tile selection switch', async () => {
+    const user = userEvent.setup()
+    let latest: WidgetSelection = DEFAULT_WIDGET_SELECTION
+    render(<Harness onSelectionChange={s => { latest = s }} />)
+    const before = latest['kpi-tile']
+    await user.click(screen.getByRole('button', { name: /kpi-tile metric variant/i }))
+    expect(latest['kpi-tile']).toBe(before)
+  })
+
+  it('only the kpi-tile widget exposes a variant toggle (no other widget gains config UI)', () => {
+    const { container } = render(<Harness />)
+    // exactly one variant-toggle row in the entire selector
+    const toggles = container.querySelectorAll('[data-testid="kpi-tile-variant-toggle"]')
+    expect(toggles).toHaveLength(1)
+  })
+})
+
 describe('WidgetSelector → export linkage', () => {
   it('clicking two cards yields a JSON export containing those two widgets in alphabetical order', async () => {
     const user = userEvent.setup()

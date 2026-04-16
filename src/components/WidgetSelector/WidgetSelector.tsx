@@ -6,7 +6,7 @@
  * Click → flips inclusion. Visual state mirrors selection. Previews are
  * read-only and themed via inherited CSS vars.
  */
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import {
   WIDGET_IDS,
   WIDGET_LABELS,
@@ -21,7 +21,13 @@ interface Props {
   onChange: (next: WidgetSelection) => void
 }
 
+type KpiVariant = 'tile' | 'metric'
+
 export default function WidgetSelector({ selection, onChange }: Props) {
+  // T-134 — kpi-tile metric variant: transient per-session, not persisted, not in export.
+  // Cavekit-widgets R4 (revised) explicitly scopes per-widget UI configuration to kpi-tile only.
+  const [kpiVariant, setKpiVariant] = useState<KpiVariant>('tile')
+
   const toggle = useCallback(
     (id: WidgetId) => {
       onChange({ ...selection, [id]: !selection[id] })
@@ -86,10 +92,34 @@ export default function WidgetSelector({ selection, onChange }: Props) {
                 onClick={() => toggle(id)}
               >
                 <span className={styles.cardPreview}>
-                  <WidgetPreview widget={id} />
+                  <WidgetPreview widget={id} variant={id === 'kpi-tile' ? kpiVariant : undefined} />
                 </span>
                 <span className={styles.cardLabel}>{WIDGET_LABELS[id]}</span>
               </button>
+              {id === 'kpi-tile' && (
+                <div className={styles.variantRow} data-testid="kpi-tile-variant-toggle">
+                  {(['tile', 'metric'] as const).map(v => {
+                    const active = kpiVariant === v
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        aria-pressed={active}
+                        aria-label={`kpi-tile ${v} variant`}
+                        data-variant-option={v}
+                        className={`${styles.variantBtn} ${active ? styles.variantBtnActive : ''}`}
+                        onClick={(e) => {
+                          // Stop propagation so this doesn't toggle the parent switch
+                          e.stopPropagation()
+                          setKpiVariant(v)
+                        }}
+                      >
+                        {v === 'tile' ? 'Tile' : 'Metric'}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </li>
           )
         })}
