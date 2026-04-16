@@ -142,6 +142,58 @@ describe('validateSpacingTokens', () => {
   })
 })
 
+// ─── T-004: Theme configuration (R4) ─────────────────────────────────────────
+
+describe('validateThemeConfig', () => {
+  const valid = {
+    name: 'my-theme',
+    colors: { primary: '#aabbcc', secondary: '#001122', background: '#ffffff', text: '#000000' },
+    typography: { fontFamily: 'Inter', baseSizePx: 16, scaleRatio: 1.25 },
+    spacing: { baseUnitPx: 8 },
+  }
+
+  it('accepts full valid config', () => {
+    expect(validateThemeConfig(valid).success).toBe(true)
+  })
+
+  it('rejects empty name', () => {
+    const r = validateThemeConfig({ ...valid, name: '' })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.errors.some((e) => e.path === 'name')).toBe(true)
+  })
+
+  it('validates colors via R1 rules (invalid hex rejected)', () => {
+    const r = validateThemeConfig({ ...valid, colors: { ...valid.colors, primary: 'bad' } })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.errors.some((e) => e.path.includes('primary'))).toBe(true)
+  })
+
+  it('validates typography via R2 rules (out-of-range baseSizePx rejected)', () => {
+    const r = validateThemeConfig({ ...valid, typography: { ...valid.typography, baseSizePx: 5 } })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.errors.some((e) => e.path.includes('baseSizePx'))).toBe(true)
+  })
+
+  it('validates spacing via R3 rules (out-of-range baseUnitPx rejected)', () => {
+    const r = validateThemeConfig({ ...valid, spacing: { baseUnitPx: 99 } })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.errors.some((e) => e.path.includes('baseUnitPx'))).toBe(true)
+  })
+
+  it('rejects unknown top-level field (.strict)', () => {
+    expect(validateThemeConfig({ ...valid, extra: true }).success).toBe(false)
+  })
+
+  it('reports field path on nested failure', () => {
+    const r = validateThemeConfig({ ...valid, colors: { ...valid.colors, text: 'bad' } })
+    expect(r.success).toBe(false)
+    if (!r.success) {
+      const paths = r.errors.map((e) => e.path)
+      expect(paths.some((p) => p.includes('text'))).toBe(true)
+    }
+  })
+})
+
 // ─── T-006: Validation surface (R6) ──────────────────────────────────────────
 
 describe('validation surface properties', () => {
