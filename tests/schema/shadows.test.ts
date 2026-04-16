@@ -84,6 +84,41 @@ describe('ShadowTokenSchema — invalid values rejected', () => {
   })
 })
 
+describe('ShadowTokenSchema — backslash exemption (R8 revised)', () => {
+  // CSS hex escapes are decoded inside the value token after declaration parsing
+  // per CSS Syntax Level 3, so they cannot break the :root { --shadow-x: VALUE; }
+  // declaration boundary. Backslash is intentionally NOT in the blocklist.
+  it('accepts shadow value containing CSS hex escape "\\3b" (encoded semicolon)', () => {
+    const result = ShadowTokenSchema.safeParse({
+      ...validShadows,
+      primary: '0 1px 2px red\\3b color: blue',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts shadow value containing other CSS hex escapes', () => {
+    expect(
+      ShadowTokenSchema.safeParse({ ...validShadows, primary: '0 1px 2px \\7d red' }).success,
+    ).toBe(true)
+  })
+
+  it('exported CSS containing escaped value remains a single well-formed declaration', () => {
+    // Sanity: the escaped value lands inside a single `--shadow-primary: ...;`
+    // declaration in the CSS output — no premature closing.
+    const themed = { ...validShadows, primary: '0 1px 2px red\\3b color' }
+    const result = ShadowTokenSchema.safeParse(themed)
+    expect(result.success).toBe(true)
+    // Build a tiny CSS snippet the way exportTheme.toCSSVars would, to prove
+    // the escape doesn't break the declaration boundary syntactically.
+    const css = `:root { --shadow-primary: ${themed.primary}; }`
+    // Exactly one `:root {`, exactly one closing `}`, exactly one `;` (the
+    // declaration terminator — the `\3b` is inside the value, not a delimiter).
+    expect((css.match(/:root \{/g) ?? []).length).toBe(1)
+    expect((css.match(/}/g) ?? []).length).toBe(1)
+    expect((css.match(/;/g) ?? []).length).toBe(1)
+  })
+})
+
 describe('validateShadowTokens', () => {
   it('returns success + data for valid input', () => {
     const r = validateShadowTokens(validShadows)

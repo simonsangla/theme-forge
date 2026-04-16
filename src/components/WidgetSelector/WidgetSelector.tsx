@@ -105,14 +105,10 @@ export default function WidgetSelector({ selection, onChange }: Props) {
                         key={v}
                         type="button"
                         aria-pressed={active}
-                        aria-label={`kpi-tile ${v} variant`}
+                        aria-label={`${v === 'tile' ? 'Tile' : 'Metric'} variant`}
                         data-variant-option={v}
                         className={`${styles.variantBtn} ${active ? styles.variantBtnActive : ''}`}
-                        onClick={(e) => {
-                          // Stop propagation so this doesn't toggle the parent switch
-                          e.stopPropagation()
-                          setKpiVariant(v)
-                        }}
+                        onClick={() => setKpiVariant(v)}
                       >
                         {v === 'tile' ? 'Tile' : 'Metric'}
                       </button>

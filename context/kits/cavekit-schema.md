@@ -95,6 +95,7 @@ Defines the canonical data model for a theme: token groups (color, typography, s
 - [ ] Validation rejects shadow groups missing any required slot
 - [ ] Validation rejects shadow groups containing slots not in the required set
 - [ ] DEFAULT_THEME and all built-in presets pass the tightened validator
+- [ ] Backslash (`\`) is intentionally NOT in the blocklist. CSS hexadecimal escapes (e.g., `\3b` for `;`) are decoded inside the value token AFTER declaration parsing per CSS Syntax Level 3, so they cannot break the `:root { --shadow-x: VALUE; }` declaration boundary. A test must demonstrate that a shadow value containing `\3b` validates as ok and the resulting CSS export is well-formed (one declaration, not two).
 **Dependencies:** none
 
 ### R9: Radius Token Group
@@ -132,4 +133,5 @@ Defines the canonical data model for a theme: token groups (color, typography, s
 - 2026-04-16: Initial draft.
 - 2026-04-16 (Batch 9): Color group expanded to 9 slots (added muted, hairline, inkSoft, surfaceInvert, onInvert). Added shadow token group (R8) and radius token group (R9). Theme configuration and variant pair validation updated to compose them.
 - 2026-04-16 (Batch 10): R8 tightened — shadow values now reject CSS-injection vectors (`;` `}` `{` `/*` `*/` `\n` `\r` `<` `>`) so untrusted imported themes cannot break out of the `:root { ... }` declaration in CSS / SCSS / Tailwind exports.
+- 2026-04-16 (Batch 11): R8 documents the intentional backslash exemption — CSS hex escapes (`\3b` etc.) are decoded inside the value token after declaration parsing, so they cannot break the declaration boundary.
 - 2026-04-16: Boundary revision (Batch 9). Color group extended to 9 slots (added muted, hairline, inkSoft, surfaceInvert, onInvert). Added shadow token group (R8) and radius token group (R9). Theme configuration and variant pair validation updated to compose them.
