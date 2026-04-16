@@ -17,10 +17,26 @@ Examples:
 - After writing a file → read it back and confirm expected content is present.
 - After a git push → verify remote state with `git ls-remote` or equivalent.
 
-**Before merging a PR, review PR page comments and code review feedback from bots and agents, and address or explicitly disposition that feedback before merge.**
+**Before merging a PR, review PR comments, formal reviews, bot/agent code review feedback, and relevant automated review findings. Address or explicitly disposition each material finding before merge.**
 
-Check: `gh pr view <number> --comments` and `gh pr reviews` before calling merge.
-For each bot/agent comment: fix, acknowledge with a reply, or explicitly record disposition in the PR or handoff.
+Check before calling merge:
+- `gh pr view <number> --comments` — inline + conversation comments
+- `gh pr view <number> --json reviews` — formal reviews
+- `gh pr checks <number>` — automated review findings (CodeQL, Copilot review, Dependabot, Snyk, etc.)
+- Any bot/agent output in check-run annotations
+
+For each material finding: fix, acknowledge with a reply, or explicitly record disposition in the PR or handoff.
+
+## Preflight
+
+**Before taking action on a repo batch, check whether any Dependabot PRs are open and determine whether they affect the current batch.**
+
+```bash
+gh pr list --author app/dependabot --state open
+```
+
+If open Dependabot PRs touch files or dependencies relevant to the current batch, resolve or
+explicitly disposition them first. Otherwise, note their existence in the batch preflight and proceed.
 
 ---
 
