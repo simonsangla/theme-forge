@@ -44,6 +44,37 @@ export type ColorTokens = z.infer<typeof ColorTokenSchema>
 export type TypographyTokens = z.infer<typeof TypographyTokenSchema>
 export type SpacingTokens = z.infer<typeof SpacingTokenSchema>
 
+// T-005 — Theme variant pair (R5): light + dark share typography + spacing
+
+export const ThemeVariantPairSchema = z
+  .object({
+    name: z.string().min(1),
+    light: ThemeConfigSchema,
+    dark: ThemeConfigSchema,
+  })
+  .strict()
+  .superRefine((val, ctx) => {
+    const typoFields = ['fontFamily', 'baseSizePx', 'scaleRatio'] as const
+    for (const field of typoFields) {
+      if (val.light.typography[field] !== val.dark.typography[field]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['dark', 'typography', field],
+          message: `typography.${field} must match between light and dark variants`,
+        })
+      }
+    }
+    if (val.light.spacing.baseUnitPx !== val.dark.spacing.baseUnitPx) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['dark', 'spacing', 'baseUnitPx'],
+        message: 'spacing.baseUnitPx must match between light and dark variants',
+      })
+    }
+  })
+
+export type ThemeVariantPair = z.infer<typeof ThemeVariantPairSchema>
+
 // T-006 — Validation surface (R6): pure result-returning functions, no throws
 
 export type ValidationSuccess<T> = { success: true; data: T }
@@ -78,4 +109,8 @@ export function validateSpacingTokens(data: unknown): ValidationResult<SpacingTo
 
 export function validateThemeConfig(data: unknown): ValidationResult<ThemeConfig> {
   return toResult(ThemeConfigSchema.safeParse(data))
+}
+
+export function validateThemeVariantPair(data: unknown): ValidationResult<ThemeVariantPair> {
+  return toResult(ThemeVariantPairSchema.safeParse(data))
 }
