@@ -1,0 +1,232 @@
+/* Read-only widget previews. All colors via inherited CSS vars from App. */
+
+.preview {
+  font-family: var(--font-family, system-ui, sans-serif);
+  color: var(--color-text, #111);
+  font-size: 11px;
+  line-height: 1.3;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+/* ── Buttons (used in button + modal + navbar previews) ─────────────────── */
+
+.btn {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.btnPrimary {
+  background: var(--color-primary, #6366f1);
+  color: var(--color-background, #fff);
+  border: 1px solid var(--color-primary, #6366f1);
+}
+
+.btnSecondary {
+  background: transparent;
+  color: var(--color-secondary, #475569);
+  border: 1px solid var(--color-secondary, #475569);
+}
+
+.btnSm {
+  padding: 3px 8px;
+  font-size: 10px;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────────── */
+
+.cardBox {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-secondary, #cbd5e1);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardTitle {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.cardBody {
+  opacity: 0.75;
+  font-size: 10px;
+}
+
+.cardLink {
+  color: var(--color-primary, #6366f1);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* ── Empty state ────────────────────────────────────────────────────────── */
+
+.emptyBox {
+  background: var(--color-background, #fff);
+  border: 1px dashed var(--color-secondary, #cbd5e1);
+  border-radius: 6px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.emptyGlyph {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--color-secondary, #94a3b8);
+}
+
+.emptyCaption {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* ── Input ──────────────────────────────────────────────────────────────── */
+
+.inputLabel {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.inputBox {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-secondary, #cbd5e1);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 10px;
+  opacity: 0.65;
+}
+
+/* ── KPI tile ───────────────────────────────────────────────────────────── */
+
+.kpiBox {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-secondary, #cbd5e1);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpiValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary, #111);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiLabel {
+  font-size: 10px;
+  opacity: 0.75;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
+.kpiTrend {
+  color: var(--color-primary, #16a34a);
+  font-weight: 700;
+}
+
+/* ── Modal ──────────────────────────────────────────────────────────────── */
+
+.modalBox {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-secondary, #cbd5e1);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  background: var(--color-primary, #6366f1);
+  color: var(--color-background, #fff);
+  padding: 5px 10px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.modalBody {
+  padding: 8px 10px;
+  font-size: 10px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 0 8px 8px;
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────────────── */
+
+.navBox {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-secondary, #cbd5e1);
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navBrand {
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--color-primary, #6366f1);
+  white-space: nowrap;
+}
+
+.navLinks {
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
+  flex: 1;
+  justify-content: center;
+  opacity: 0.8;
+}
+
+/* ── Table ──────────────────────────────────────────────────────────────── */
+
+.tableBox {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-secondary, #cbd5e1);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 10px;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.9fr;
+  padding: 4px 8px;
+  gap: 6px;
+}
+
+.tableHead {
+  background: var(--color-primary, #6366f1);
+  color: var(--color-background, #fff);
+  font-weight: 700;
+}
+
+.tableRowAlt {
+  background: rgba(0, 0, 0, 0.04);
+}
