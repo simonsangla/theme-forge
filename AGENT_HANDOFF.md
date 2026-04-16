@@ -1,5 +1,30 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch 6 — Dependabot Triage (PRs #1–#5)
+
+**Date:** 2026-04-16
+**Status:** Complete. Repo baseline cleared.
+
+### Disposition
+
+| PR | Title | Disposition | Reason |
+|---|---|---|---|
+| #1 | `@eslint/js` 9→10 | CLOSED (deferred) | ESLint 10 requires coordinated ecosystem upgrade; breaks typescript-eslint + plugins peer deps. Not a single-PR bump. |
+| #2 | `actions/setup-node` v4→v6.3.0 | MERGED | Clean SHA pin update, CI pass |
+| #3 | `actions/checkout` v4→v6.0.2 | MERGED (manual rebase in this PR) | Conflicted with #2 on same file; manually applied |
+| #4 | `eslint` 9→10 | CLOSED (deferred) | Same ecosystem issue as #1 |
+| #5 | `@types/node` v24→v25 | MERGED | Clean dev-type bump, CI pass |
+
+### Follow-up needed
+
+ESLint 10 ecosystem upgrade is a dedicated batch. Wait for `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh` to publish eslint@10-compatible versions before retrying #1/#4 equivalents.
+
+### Next recommended batch
+
+Batch 3 product work: export actions (Copy CSS/JSON buttons) + preset named themes + theme name input. Repo baseline is now clean — all 5 Dependabot PRs dispositioned.
+
+---
+
 ## Batch 5 — Instruction Updates: Dependabot Preflight + Widened Merge Review
 
 **Date:** 2026-04-16
