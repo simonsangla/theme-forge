@@ -4,46 +4,80 @@ import { ThemeConfigSchema, validateThemeConfig } from '../../schema/theme'
 import type { ValidationResult } from '../../schema/theme'
 import { DEFAULT_THEME } from './defaults'
 
-// Internal state shape — extended by T-009 to add history stack
+const HISTORY_LIMIT = 50
+
+// T-009: history-aware state shape
 interface ThemeState {
-  theme: ThemeConfig
+  past: ThemeConfig[]    // oldest → newest prior states
+  theme: ThemeConfig     // current active theme (always valid)
+  future: ThemeConfig[]  // states available for redo (newest → oldest)
+  // Cold-load flag: when true, the current entry is the initial state (not an undoable change)
+  isInitialLoad: boolean
 }
 
 type ThemeAction =
-  | { type: 'COMMIT'; next: ThemeConfig }
+  | { type: 'COMMIT'; next: ThemeConfig; isInitialLoad?: boolean }
+  | { type: 'UNDO' }
+  | { type: 'REDO' }
 
 function themeReducer(state: ThemeState, action: ThemeAction): ThemeState {
   switch (action.type) {
-    case 'COMMIT':
-      // Validate to guarantee the active theme always satisfies R4
-      return ThemeConfigSchema.safeParse(action.next).success
-        ? { ...state, theme: action.next }
-        : state
+    case 'COMMIT': {
+      const valid = ThemeConfigSchema.safeParse(action.next)
+      if (!valid.success) return state
+      if (action.isInitialLoad) {
+        // Cold-load restore: becomes initial state, no prior states
+        return { past: [], theme: valid.data, future: [], isInitialLoad: true }
+      }
+      // Regular commit: push current to past, clear future
+      const newPast = [...state.past, state.theme].slice(-HISTORY_LIMIT)
+      return { past: newPast, theme: valid.data, future: [], isInitialLoad: false }
+    }
+    case 'UNDO': {
+      if (state.past.length === 0) return state
+      const previous = state.past[state.past.length - 1]
+      return {
+        past: state.past.slice(0, -1),
+        theme: previous,
+        future: [state.theme, ...state.future],
+        isInitialLoad: false,
+      }
+    }
+    case 'REDO': {
+      if (state.future.length === 0) return state
+      const next = state.future[0]
+      return {
+        past: [...state.past, state.theme].slice(-HISTORY_LIMIT),
+        theme: next,
+        future: state.future.slice(1),
+        isInitialLoad: false,
+      }
+    }
   }
 }
 
-// T-008 (R6): Active theme state store
-// - Single source of truth for the active ThemeConfig
-// - Always satisfies schema validation (invalid commits are silently rejected)
-// - Subscribers notified via React re-render on every committed change
-// - Reading .theme always returns the most recently committed valid value
+// T-008 + T-009: Active theme store with undo/redo history
 export function useThemeStore(initial: ThemeConfig = DEFAULT_THEME) {
-  const [state, dispatch] = useReducer(themeReducer, { theme: initial })
+  const [state, dispatch] = useReducer(themeReducer, {
+    past: [],
+    theme: initial,
+    future: [],
+    isInitialLoad: true,
+  })
 
-  // Commit a full theme replacement (used by presets, import, reset, external adoption)
-  // Returns a ValidationResult so callers can surface errors to the user
+  // Full validated commit (used by presets, import, reset, external adoption).
+  // isInitialLoad=true → becomes initial history state (no prior states to undo).
   const commitTheme = useCallback(
-    (candidate: unknown): ValidationResult<ThemeConfig> => {
+    (candidate: unknown, isInitialLoad = false): ValidationResult<ThemeConfig> => {
       const result = validateThemeConfig(candidate)
       if (result.success) {
-        dispatch({ type: 'COMMIT', next: result.data })
+        dispatch({ type: 'COMMIT', next: result.data, isInitialLoad })
       }
       return result
     },
     [],
   )
 
-  // Partial update helpers — merge partial into active theme, then validate + commit
   const updateColors = useCallback(
     (partial: Partial<ThemeConfig['colors']>) => {
       commitTheme({ ...state.theme, colors: { ...state.theme.colors, ...partial } })
@@ -72,6 +106,9 @@ export function useThemeStore(initial: ThemeConfig = DEFAULT_THEME) {
     [state.theme, commitTheme],
   )
 
+  const undo = useCallback(() => dispatch({ type: 'UNDO' }), [])
+  const redo = useCallback(() => dispatch({ type: 'REDO' }), [])
+
   return {
     theme: state.theme,
     commitTheme,
@@ -79,6 +116,11 @@ export function useThemeStore(initial: ThemeConfig = DEFAULT_THEME) {
     updateTypography,
     updateSpacing,
     updateName,
+    undo,
+    redo,
+    canUndo: state.past.length > 0,
+    canRedo: state.future.length > 0,
+    historySize: state.past.length,
   }
 }
 
