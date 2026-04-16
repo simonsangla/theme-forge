@@ -1,5 +1,30 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch 4 — Skill Storage Boundary Correction
+
+**Date:** 2026-04-16
+**Status:** Complete.
+
+### What was done
+
+The bootstrap skill was incorrectly placed inside this repo at `docs/skills/repo-bootstrap/SKILL.md`. A reusable cross-repo skill must live in the shared external skills directory. Corrected.
+
+### Canonical location
+
+`~/.claude/skills/repo-bootstrap/SKILL.md` (external, shared across all repos). Now visible as the `repo-bootstrap` skill in the Skill tool list.
+
+### Repo changes
+
+- Deleted `docs/skills/repo-bootstrap/SKILL.md` (was the canonical copy — wrong location)
+- Removed now-empty `docs/skills/` and `docs/` directories
+- No repo-local duplicate kept. Traceability is recorded here in this handoff only; no second source of truth.
+
+### Why no repo-local pointer file
+
+`AGENT_HANDOFF.md` already serves as the source of truth for batch history. A separate pointer file would be noise. The external canonical path and origin-from-this-repo are recorded in this entry plus in the skill's own §9 (validation status references theme-forge bootstrap run).
+
+---
+
 ## Batch 3 — Bootstrap Skill Draft + Execution Rules
 
 **Date:** 2026-04-16
