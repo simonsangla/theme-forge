@@ -1,5 +1,48 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch B-arch — Simple/Advanced color mode contract (no code)
+
+**Date:** 2026-04-16
+**Merged commit:** `0c1cbce` (PR #24)
+**Status:** Complete. Architecture-only. Zero source/test/schema changes. All four gates green.
+
+### Scope
+
+Pure cavekit edits locking the contract for the deferred Batch B (Simple/Advanced color mode) named in the Batch A "Next recommended batch" section. Frees the next executor to implement against a frozen contract.
+
+| File | Change |
+|---|---|
+| `context/kits/cavekit-editor.md` | New **R11: Color Mode (Simple / Advanced)** with 9 testable acceptance criteria. R1 annotated as mode-aware. |
+| `context/kits/cavekit-persistence.md` | New **R8: Optional Color-Mode Fields on Persisted Record** (`colorMode`, `colorOverrides` — both omittable, no version bump, legacy records load as Simple with empty overrides). R6 clarified that wrapper-field additions don't bump version. |
+| `context/kits/cavekit-product-boundary.md` | Changelog-only — Simple/Advanced confirmed in-scope under R1 capability "Theme design via interactive controls". R1/R2/R3/R4 text unchanged. |
+| `context/kits/cavekit-overview.md` | Domain index counts updated (Editor R1–R11, Persistence R1–R8). Coverage Summary 53 → 55 reqs. New Editor→Persistence cross-ref. |
+
+### Constraints honored
+
+- `git diff --stat` shows exactly 4 files, all under `context/kits/`. No `src/`, `tests/`, or schema touched.
+- Boundary R2 unviolated: no backend, auth, DB, CMS, routing, SSR, drag-drop, plugin system, analytics, motion, theme marketplace.
+- Schema generation (PersistedRecord version) stays at 1; back-compat via optional fields + read-time defaults.
+- Catalog stays at 11 widget IDs in alphabetical order.
+- Out of scope (deferred to a later dedicated product batch): preset redesign, new template/theme families, "modern/smooth/funny" template aesthetics.
+
+### Validation
+
+| Gate | Result |
+|---|---|
+| Lint | 0 errors |
+| Typecheck | pass |
+| Test | 267/267 pass (no new tests; kit edits don't run code) |
+| Build | pass (vite ~101ms; 21.39kB CSS / 295.78kB JS) |
+| CI | pass (Lint · Typecheck · Test, Vercel, Vercel Preview Comments) |
+| Open Dependabot PRs at preflight | none |
+| Pre-merge review surface | only Vercel deployment notification — no material findings |
+
+### Next recommended batch
+
+**Batch B-impl — wire R11 + R8 into editor/store/persistence.** Add deterministic derivation function for Simple mode (Primary + Neutral → 9 colors per Batch A handoff rule). Add tests for derivation determinism (same Primary always yields same secondary; same Neutral always yields same neutral-derived 7 slots) and round-trip preservation (save → load preserves `colorMode` and `colorOverrides`). Stays within R1 capabilities; no new boundary revisions required.
+
+---
+
 ## Batch A — UI hierarchy + payoff surface
 
 **Date:** 2026-04-16
