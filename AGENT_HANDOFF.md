@@ -1,5 +1,37 @@
 # AGENT HANDOFF — theme-forge
 
+## Fix Batch 2 — Build gate
+
+**Date:** 2026-04-16
+**Merged commit:** `57b1cc24aabb6b2bc44b21fcd9e4c718e7c317e4` (PR #8)
+**Status:** Complete. All four gates green. CI now runs lint + typecheck + test + build.
+
+### Root causes fixed
+
+- `src/export/exportTheme.ts:1` — `ThemeConfig` imported as value; `verbatimModuleSyntax: true` requires `import type` for type-only imports. Fix: `import { type ThemeConfig, ... }`
+- `vite.config.ts:1` — `test` config block not in Vite's `UserConfigExport` type. Fix: import `defineConfig` from `vitest/config` instead of `vite`
+
+### Files changed
+
+- `src/export/exportTheme.ts` — `import type` for ThemeConfig
+- `vite.config.ts` — import from `vitest/config`
+- `.github/workflows/ci.yml` — added Build step
+
+### Current gate status
+
+| Gate | Local | CI |
+|---|---|---|
+| lint | PASS | PASS |
+| typecheck | PASS | PASS |
+| test | PASS (6/6) | PASS |
+| build | PASS | PASS |
+
+### Next action
+
+Repo is a clean starter. All four gates green locally and in CI. Branch protection active on main. Ready for Batch 2 product work.
+
+---
+
 ## Bootstrap Run 1
 
 **Status:** Completed with drift. CI green. Branch protection NOT active.
