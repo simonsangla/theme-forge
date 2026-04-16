@@ -56,7 +56,20 @@ All drift was scaffold-default leakage. No intentional judgment was applied to v
 - Verified with separate `GET` readback (not inferred from exit code)
 
 ### Branch protection — readback-verified active state
-_(populated after merge — see validation section)_
+
+Verified via separate `GET /branches/main/protection` after write. Merged commit: `d70db207233562aa7ccb3640d8a9532dd08d4a00`
+
+```json
+{
+  "required_status_checks": ["Lint · Typecheck · Test"],
+  "strict": true,
+  "required_reviews": 1,
+  "dismiss_stale": true,
+  "enforce_admins": false,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+```
 
 ### Execution discipline
 `AGENTS.md` now contains in a permanent **Execution Discipline** section:
