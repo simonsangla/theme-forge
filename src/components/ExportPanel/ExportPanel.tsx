@@ -13,16 +13,53 @@ interface FormatMeta {
   id: Format
   label: string
   ext: string
+  description: string
   generate: (theme: ThemeConfig, widgets?: WidgetSelection) => string
 }
 
 const FORMATS: FormatMeta[] = [
-  { id: 'json',             label: 'JSON',           ext: '.json',       generate: toJSON },
-  { id: 'css',              label: 'CSS Vars',        ext: '.css',        generate: toCSSVars },
-  { id: 'ts',               label: 'TypeScript',      ext: '.ts',         generate: toTSObject },
-  { id: 'tailwind',         label: 'Tailwind',        ext: '.js',         generate: toTailwindConfig },
-  { id: 'scss',             label: 'SCSS',            ext: '.scss',       generate: toSCSSVars },
-  { id: 'style-dictionary', label: 'Style Dict',      ext: '.tokens.json', generate: toStyleDictionary },
+  {
+    id: 'json',
+    label: 'JSON',
+    ext: '.json',
+    description: 'Portable configuration — import into any tooling.',
+    generate: toJSON,
+  },
+  {
+    id: 'css',
+    label: 'CSS Vars',
+    ext: '.css',
+    description: 'Drop-in CSS custom properties under :root.',
+    generate: toCSSVars,
+  },
+  {
+    id: 'ts',
+    label: 'TypeScript',
+    ext: '.ts',
+    description: 'Typed `as const` object — import directly into TS apps.',
+    generate: toTSObject,
+  },
+  {
+    id: 'tailwind',
+    label: 'Tailwind',
+    ext: '.js',
+    description: 'Merge into tailwind.config.js under theme.extend.',
+    generate: toTailwindConfig,
+  },
+  {
+    id: 'scss',
+    label: 'SCSS',
+    ext: '.scss',
+    description: 'Top-level SCSS variables — @use from any stylesheet.',
+    generate: toSCSSVars,
+  },
+  {
+    id: 'style-dictionary',
+    label: 'Style Dict',
+    ext: '.tokens.json',
+    description: 'Amazon Style Dictionary tokens with typed values.',
+    generate: toStyleDictionary,
+  },
 ]
 
 function toSafeFilename(name: string): string {
@@ -67,6 +104,11 @@ export default function ExportPanel({ theme, widgets }: Props) {
 
   return (
     <div className={styles.panel}>
+      <header className={styles.panelHeader}>
+        <span className={styles.panelEyebrow}>Export</span>
+        <span className={styles.panelTitle}>Ship your theme</span>
+      </header>
+
       {/* Format selector — T-029 / R8 */}
       <div className={styles.tabs} role="tablist" aria-label="Export format">
         {FORMATS.map(f => (
@@ -78,17 +120,34 @@ export default function ExportPanel({ theme, widgets }: Props) {
             className={`${styles.tab} ${format === f.id ? styles.tabActive : ''}`}
             onClick={() => setFormat(f.id)}
           >
-            {f.label}
+            <span className={styles.tabLabel}>{f.label}</span>
+            <span className={styles.tabExt}>{f.ext}</span>
           </button>
         ))}
       </div>
 
-      {/* Actions — T-030 copy + T-031 download */}
+      {/* Description — short per-format payoff line */}
+      <p className={styles.description} aria-live="polite">
+        {meta.description}
+      </p>
+
+      {/* Actions — T-030 copy + T-031 download.
+          Download is the primary CTA, Copy is secondary. */}
       <div className={styles.actions}>
-        <button type="button" className={styles.actionBtn} onClick={handleCopy}>
+        <button
+          type="button"
+          className={styles.copyBtn}
+          onClick={handleCopy}
+          data-testid="export-copy"
+        >
           {copyStatus === 'ok' ? 'Copied!' : copyStatus === 'err' ? 'Copy failed' : 'Copy'}
         </button>
-        <button type="button" className={styles.actionBtn} onClick={handleDownload}>
+        <button
+          type="button"
+          className={styles.downloadBtn}
+          onClick={handleDownload}
+          data-testid="export-download"
+        >
           Download {meta.ext}
         </button>
       </div>

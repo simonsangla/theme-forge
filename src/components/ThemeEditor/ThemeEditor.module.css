@@ -1,9 +1,12 @@
 .editor {
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .section {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .sectionTitle {
@@ -11,10 +14,78 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #888;
-  margin-bottom: 10px;
+  color: #555;
+  margin: 0 0 10px;
   padding-bottom: 6px;
   border-bottom: 1px solid #f0f0f0;
+}
+
+.subsectionTitle {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888;
+  margin: 14px 0 8px;
+}
+
+/* ── Collapsible (native <details>) ──────────── */
+
+.collapsible {
+  margin-bottom: 20px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 14px;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  list-style: none;
+  /* Match .sectionTitle weight exactly */
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #555;
+  user-select: none;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summaryTitle {
+  flex: 1;
+}
+
+.summaryChevron {
+  font-size: 10px;
+  color: #bbb;
+  transition: transform 0.15s ease;
+}
+
+.collapsible[open] .summaryChevron {
+  transform: rotate(180deg);
+}
+
+.summary:hover .summaryChevron {
+  color: #555;
+}
+
+.collapsibleBody {
+  padding-top: 12px;
+}
+
+.advancedGroup {
+  margin-bottom: 14px;
+}
+
+.advancedGroup:last-child {
+  margin-bottom: 0;
 }
 
 /* ── generic row ─────────────────────────────── */

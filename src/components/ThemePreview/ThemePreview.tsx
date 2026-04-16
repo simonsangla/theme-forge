@@ -28,6 +28,14 @@ export default function ThemePreview({ theme }: Props) {
     <div className={styles.preview}>
       {/* T-019: no toggle for single theme (variant pair not yet supported in store) */}
 
+      {/* Preview header strip — app chrome, does NOT use theme vars */}
+      <div className={styles.previewHeader}>
+        <span className={styles.previewLabel}>Preview</span>
+        <span className={styles.previewThemeName} title={displayTheme.name}>
+          {displayTheme.name}
+        </span>
+      </div>
+
       {/* Canvas — tokens scoped here, do not leak to chrome (T-017 / R1) */}
       <div className={styles.canvas} style={styleVars}>
         {/* App bar */}
