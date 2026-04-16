@@ -9,10 +9,18 @@ import {
 } from '../../src/export/exportTheme'
 import type { ThemeConfig, ThemeVariantPair } from '../../src/schema/theme'
 import { DEFAULT_WIDGET_SELECTION, type WidgetSelection } from '../../src/schema/widgets'
+import { DEFAULT_THEME } from '../../src/lib/theme/defaults'
 
 const baseTheme: ThemeConfig = {
+  ...DEFAULT_THEME,
   name: 'wtest',
-  colors: { primary: '#000000', secondary: '#222222', background: '#ffffff', text: '#111111' },
+  colors: {
+    ...DEFAULT_THEME.colors,
+    primary: '#000000',
+    secondary: '#222222',
+    background: '#ffffff',
+    text: '#111111',
+  },
   typography: { fontFamily: 'Inter, sans-serif', baseSizePx: 16, scaleRatio: 1.25 },
   spacing: { baseUnitPx: 4 },
 }
@@ -20,7 +28,16 @@ const baseTheme: ThemeConfig = {
 const variantPair: ThemeVariantPair = {
   name: 'wtest-pair',
   light: baseTheme,
-  dark: { ...baseTheme, colors: { primary: '#ffffff', secondary: '#dddddd', background: '#000000', text: '#eeeeee' } },
+  dark: {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      primary: '#ffffff',
+      secondary: '#dddddd',
+      background: '#000000',
+      text: '#eeeeee',
+    },
+  },
 }
 
 const someSelected: WidgetSelection = {

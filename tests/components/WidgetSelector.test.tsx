@@ -12,10 +12,18 @@ import {
 } from '../../src/schema/widgets'
 import { toJSON } from '../../src/export/exportTheme'
 import type { ThemeConfig } from '../../src/schema/theme'
+import { DEFAULT_THEME } from '../../src/lib/theme/defaults'
 
 const sampleTheme: ThemeConfig = {
+  ...DEFAULT_THEME,
   name: 'sample',
-  colors: { primary: '#3b82f6', secondary: '#8b5cf6', background: '#ffffff', text: '#111827' },
+  colors: {
+    ...DEFAULT_THEME.colors,
+    primary: '#3b82f6',
+    secondary: '#8b5cf6',
+    background: '#ffffff',
+    text: '#111827',
+  },
   typography: { fontFamily: 'Inter, sans-serif', baseSizePx: 16, scaleRatio: 1.25 },
   spacing: { baseUnitPx: 4 },
 }

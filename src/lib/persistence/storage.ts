@@ -7,13 +7,17 @@
  * - T-036 (R6): schema versioning — version field in every record
  * - T-037 (R7): storage availability detection
  *
- * The persisted payload now carries both the theme AND the widget selection.
- * Records lacking a widget selection (legacy v1 records) load successfully
- * with the default selection (all widgets off) — read is backward compatible.
+ * The persisted payload carries both the theme AND the widget selection.
+ * Read back-compat:
+ * - T-109: legacy records lacking the new color slots / shadows / radii
+ *   load by patching missing groups with DEFAULT_THEME values
+ * - T-110: legacy records lacking widget selection (or missing the 3 new widget
+ *   keys) load by patching from DEFAULT_WIDGET_SELECTION
  */
 
 import type { ThemeConfig } from '../../schema/theme'
 import { validateThemeConfig } from '../../schema/theme'
+import { DEFAULT_THEME } from '../theme/defaults'
 import {
   type WidgetSelection,
   validateWidgetSelection,
@@ -47,6 +51,39 @@ export type LoadResult =
   | { status: 'corrupt'; reason: string }
   | { status: 'unavailable' }
 
+/**
+ * T-109 — patch a legacy theme object so it satisfies the current schema.
+ *
+ * Adds any missing color slots, shadows group, or radii group from
+ * DEFAULT_THEME. Existing values are preserved. If the input isn't an object,
+ * returns it unchanged so the validator surfaces a structured error.
+ */
+function patchLegacyTheme(raw: unknown): unknown {
+  if (typeof raw !== 'object' || raw === null) return raw
+  const r = raw as Record<string, unknown>
+  const colors = (typeof r.colors === 'object' && r.colors !== null)
+    ? { ...DEFAULT_THEME.colors, ...(r.colors as Record<string, unknown>) }
+    : { ...DEFAULT_THEME.colors }
+  const shadows = (typeof r.shadows === 'object' && r.shadows !== null)
+    ? { ...DEFAULT_THEME.shadows, ...(r.shadows as Record<string, unknown>) }
+    : { ...DEFAULT_THEME.shadows }
+  const radii = (typeof r.radii === 'object' && r.radii !== null)
+    ? { ...DEFAULT_THEME.radii, ...(r.radii as Record<string, unknown>) }
+    : { ...DEFAULT_THEME.radii }
+  return { ...r, colors, shadows, radii }
+}
+
+/**
+ * T-110 — patch a legacy widget selection so it satisfies the current schema.
+ *
+ * Fills in any missing keys (e.g., the 3 new IDs added in batch 9) with
+ * `false` from DEFAULT_WIDGET_SELECTION. Existing booleans preserved.
+ */
+function patchLegacyWidgets(raw: unknown): unknown {
+  if (typeof raw !== 'object' || raw === null) return raw
+  return { ...DEFAULT_WIDGET_SELECTION, ...(raw as Record<string, unknown>) }
+}
+
 /** T-034: load and validate the persisted payload */
 export function loadTheme(): LoadResult {
   if (!isStorageAvailable()) return { status: 'unavailable' }
@@ -77,7 +114,9 @@ export function loadTheme(): LoadResult {
     return { status: 'corrupt', reason: 'unknown schema version' }
   }
 
-  const themeResult = validateThemeConfig((record as PersistedRecord).theme)
+  // T-109: patch legacy theme groups before validation so old payloads still load
+  const patchedTheme = patchLegacyTheme((record as PersistedRecord).theme)
+  const themeResult = validateThemeConfig(patchedTheme)
   if (!themeResult.success) {
     return {
       status: 'corrupt',
@@ -85,13 +124,13 @@ export function loadTheme(): LoadResult {
     }
   }
 
-  // Widgets are optional in stored payload — legacy records without them load
-  // with the default selection. A present-but-malformed widgets object is
-  // corrupt (we trust nothing partial).
+  // T-110: patch legacy widget selection before validation. Missing field -> default.
+  // Present-but-non-object stays raw so the validator catches the type error.
   let widgets: WidgetSelection = DEFAULT_WIDGET_SELECTION
   const rawWidgets = (record as PersistedRecord).widgets
   if (rawWidgets !== undefined) {
-    const widgetResult = validateWidgetSelection(rawWidgets)
+    const patchedWidgets = patchLegacyWidgets(rawWidgets)
+    const widgetResult = validateWidgetSelection(patchedWidgets)
     if (!widgetResult.success || !widgetResult.data) {
       return {
         status: 'corrupt',

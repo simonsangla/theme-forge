@@ -9,10 +9,18 @@ import {
 } from '../../src/export/exportTheme'
 import { validateThemeConfig } from '../../src/schema/theme'
 import type { ThemeConfig, ThemeVariantPair } from '../../src/schema/theme'
+import { DEFAULT_THEME } from '../../src/lib/theme/defaults'
 
 const baseTheme: ThemeConfig = {
+  ...DEFAULT_THEME,
   name: 'test-theme',
-  colors: { primary: '#3b82f6', secondary: '#8b5cf6', background: '#ffffff', text: '#111827' },
+  colors: {
+    ...DEFAULT_THEME.colors,
+    primary: '#3b82f6',
+    secondary: '#8b5cf6',
+    background: '#ffffff',
+    text: '#111827',
+  },
   typography: { fontFamily: 'Inter, sans-serif', baseSizePx: 16, scaleRatio: 1.25 },
   spacing: { baseUnitPx: 4 },
 }
@@ -21,10 +29,15 @@ const variantPair: ThemeVariantPair = {
   name: 'test-pair',
   light: baseTheme,
   dark: {
+    ...baseTheme,
     name: 'test-theme',
-    colors: { primary: '#818cf8', secondary: '#a78bfa', background: '#1e1e2e', text: '#cdd6f4' },
-    typography: baseTheme.typography,
-    spacing: baseTheme.spacing,
+    colors: {
+      ...baseTheme.colors,
+      primary: '#818cf8',
+      secondary: '#a78bfa',
+      background: '#1e1e2e',
+      text: '#cdd6f4',
+    },
   },
 }
 

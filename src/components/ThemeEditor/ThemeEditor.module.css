@@ -176,6 +176,40 @@
   flex-shrink: 0;
 }
 
+/* ── shadows + radii (T-125 / T-126) ─────────── */
+
+.shadowRow {
+  margin-bottom: 8px;
+}
+
+.shadowTextarea {
+  width: 100%;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fafafa;
+  color: #333;
+  resize: vertical;
+}
+
+.radiusRow {
+  margin-bottom: 4px;
+}
+
+.radiusInput {
+  width: 80px;
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fafafa;
+  color: #333;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── reset ───────────────────────────────────── */
 
 .resetBtn {

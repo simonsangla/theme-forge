@@ -25,6 +25,11 @@ function resolveWidgets(widgets?: WidgetSelection): WidgetId[] {
   return selectedWidgetIds(widgets)
 }
 
+// CSS-var-friendly key conversion: 'inkSoft' → 'ink-soft', 'pricing-card' stays
+function kebab(s: string): string {
+  return s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+}
+
 // ── T-022 JSON export ─────────────────────────────────────────────────────────
 
 export function toJSON(config: ThemeConfig, widgets?: WidgetSelection): string {
@@ -40,7 +45,7 @@ export function toJSONVariant(pair: ThemeVariantPair, widgets?: WidgetSelection)
   return JSON.stringify(payload, null, 2)
 }
 
-// ── T-023 CSS custom properties ───────────────────────────────────────────────
+// ── T-023 + T-111 CSS custom properties ───────────────────────────────────────
 
 function widgetsCommentLine(widgets?: WidgetSelection): string | null {
   if (!widgets) return null
@@ -48,9 +53,27 @@ function widgetsCommentLine(widgets?: WidgetSelection): string | null {
   return `/* widgets: ${ids.length ? ids.join(', ') : '(none)'} */`
 }
 
+function colorVarLines(colors: ThemeConfig['colors']): string[] {
+  return (Object.keys(colors) as Array<keyof typeof colors>).map(
+    (k) => `  --color-${kebab(String(k))}: ${colors[k]};`,
+  )
+}
+
+function shadowVarLines(shadows: ThemeConfig['shadows']): string[] {
+  return (Object.keys(shadows) as Array<keyof typeof shadows>).map(
+    (k) => `  --shadow-${k}: ${shadows[k]};`,
+  )
+}
+
+function radiusVarLines(radii: ThemeConfig['radii']): string[] {
+  return (Object.keys(radii) as Array<keyof typeof radii>).map(
+    (k) => `  --radius-${k}: ${radii[k]}px;`,
+  )
+}
+
 export function toCSSVars(config: ThemeConfig, widgets?: WidgetSelection): string {
   ThemeConfigSchema.parse(config)
-  const { colors, typography, spacing } = config
+  const { colors, typography, spacing, shadows, radii } = config
   const [tsXs, tsSm, tsMd, tsLg] = typeScale(typography.baseSizePx, typography.scaleRatio)
   const [sp1, sp2, sp4, sp8] = spacingScale(spacing.baseUnitPx)
   const lines: string[] = []
@@ -58,10 +81,7 @@ export function toCSSVars(config: ThemeConfig, widgets?: WidgetSelection): strin
   if (header) lines.push(header)
   lines.push(
     ':root {',
-    `  --color-primary: ${colors.primary};`,
-    `  --color-secondary: ${colors.secondary};`,
-    `  --color-background: ${colors.background};`,
-    `  --color-text: ${colors.text};`,
+    ...colorVarLines(colors),
     `  --font-family: ${typography.fontFamily};`,
     `  --font-size-xs: ${tsXs}px;`,
     `  --font-size-sm: ${tsSm}px;`,
@@ -72,6 +92,8 @@ export function toCSSVars(config: ThemeConfig, widgets?: WidgetSelection): strin
     `  --spacing-2: ${sp2}px;`,
     `  --spacing-4: ${sp4}px;`,
     `  --spacing-8: ${sp8}px;`,
+    ...shadowVarLines(shadows),
+    ...radiusVarLines(radii),
     '}',
   )
   return lines.join('\n')
@@ -101,20 +123,35 @@ export function toTSObjectVariant(pair: ThemeVariantPair, widgets?: WidgetSelect
   return `${themeBlock}\n\n${widgetBlock}`
 }
 
-// ── T-025 Tailwind config export ──────────────────────────────────────────────
+// ── T-025 + T-113 Tailwind config export ─────────────────────────────────────
+
+function twColorsObject(colors: ThemeConfig['colors']): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const k of Object.keys(colors) as Array<keyof typeof colors>) {
+    out[kebab(String(k))] = colors[k]
+  }
+  return out
+}
+
+function twShadowsObject(shadows: ThemeConfig['shadows']): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const k of Object.keys(shadows) as Array<keyof typeof shadows>) out[k] = shadows[k]
+  return out
+}
+
+function twRadiiObject(radii: ThemeConfig['radii']): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const k of Object.keys(radii) as Array<keyof typeof radii>) out[k] = `${radii[k]}px`
+  return out
+}
 
 export function toTailwindConfig(config: ThemeConfig, widgets?: WidgetSelection): string {
   ThemeConfigSchema.parse(config)
-  const { colors, typography, spacing } = config
+  const { colors, typography, spacing, shadows, radii } = config
   const [tsXs, tsSm, tsMd, tsLg] = typeScale(typography.baseSizePx, typography.scaleRatio)
   const [sp1, sp2, sp4, sp8] = spacingScale(spacing.baseUnitPx)
   const themeExtend: Record<string, unknown> = {
-    colors: {
-      primary: colors.primary,
-      secondary: colors.secondary,
-      background: colors.background,
-      text: colors.text,
-    },
+    colors: twColorsObject(colors),
     fontFamily: { base: [typography.fontFamily] },
     fontSize: {
       xs: `${tsXs}px`,
@@ -128,6 +165,8 @@ export function toTailwindConfig(config: ThemeConfig, widgets?: WidgetSelection)
       '4': `${sp4}px`,
       '8': `${sp8}px`,
     },
+    boxShadow: twShadowsObject(shadows),
+    borderRadius: twRadiiObject(radii),
   }
   if (widgets) themeExtend.widgets = resolveWidgets(widgets)
   const obj = { theme: { extend: themeExtend } }
@@ -139,33 +178,43 @@ export function toTailwindConfigVariant(pair: ThemeVariantPair, widgets?: Widget
   const [sp1, sp2, sp4, sp8] = spacingScale(pair.light.spacing.baseUnitPx)
   const themeExtend: Record<string, unknown> = {
     colors: {
-      light: {
-        primary: pair.light.colors.primary,
-        secondary: pair.light.colors.secondary,
-        background: pair.light.colors.background,
-        text: pair.light.colors.text,
-      },
-      dark: {
-        primary: pair.dark.colors.primary,
-        secondary: pair.dark.colors.secondary,
-        background: pair.dark.colors.background,
-        text: pair.dark.colors.text,
-      },
+      light: twColorsObject(pair.light.colors),
+      dark: twColorsObject(pair.dark.colors),
     },
     fontFamily: { base: [pair.light.typography.fontFamily] },
     fontSize: { xs: `${tsXs}px`, sm: `${tsSm}px`, md: `${tsMd}px`, lg: `${tsLg}px` },
     spacing: { '1': `${sp1}px`, '2': `${sp2}px`, '4': `${sp4}px`, '8': `${sp8}px` },
+    boxShadow: twShadowsObject(pair.light.shadows),
+    borderRadius: twRadiiObject(pair.light.radii),
   }
   if (widgets) themeExtend.widgets = resolveWidgets(widgets)
   const obj = { theme: { extend: themeExtend } }
   return `/** @type {import('tailwindcss').Config} */\nexport default ${JSON.stringify(obj, null, 2)}`
 }
 
-// ── T-026 SCSS variables export ───────────────────────────────────────────────
+// ── T-026 + T-112 SCSS variables export ──────────────────────────────────────
+
+function scssColorLines(colors: ThemeConfig['colors'], prefix = ''): string[] {
+  return (Object.keys(colors) as Array<keyof typeof colors>).map(
+    (k) => `$${prefix}color-${kebab(String(k))}: ${colors[k]};`,
+  )
+}
+
+function scssShadowLines(shadows: ThemeConfig['shadows']): string[] {
+  return (Object.keys(shadows) as Array<keyof typeof shadows>).map(
+    (k) => `$shadow-${k}: ${shadows[k]};`,
+  )
+}
+
+function scssRadiusLines(radii: ThemeConfig['radii']): string[] {
+  return (Object.keys(radii) as Array<keyof typeof radii>).map(
+    (k) => `$radius-${k}: ${radii[k]}px;`,
+  )
+}
 
 export function toSCSSVars(config: ThemeConfig, widgets?: WidgetSelection): string {
   ThemeConfigSchema.parse(config)
-  const { colors, typography, spacing } = config
+  const { colors, typography, spacing, shadows, radii } = config
   const [tsXs, tsSm, tsMd, tsLg] = typeScale(typography.baseSizePx, typography.scaleRatio)
   const [sp1, sp2, sp4, sp8] = spacingScale(spacing.baseUnitPx)
   const lines: string[] = []
@@ -175,10 +224,7 @@ export function toSCSSVars(config: ThemeConfig, widgets?: WidgetSelection): stri
     lines.push(`$widgets: (${ids.map(id => `"${id}"`).join(', ')});`)
   }
   lines.push(
-    `$color-primary: ${colors.primary};`,
-    `$color-secondary: ${colors.secondary};`,
-    `$color-background: ${colors.background};`,
-    `$color-text: ${colors.text};`,
+    ...scssColorLines(colors),
     `$font-family: ${typography.fontFamily};`,
     `$font-size-xs: ${tsXs}px;`,
     `$font-size-sm: ${tsSm}px;`,
@@ -189,6 +235,8 @@ export function toSCSSVars(config: ThemeConfig, widgets?: WidgetSelection): stri
     `$spacing-2: ${sp2}px;`,
     `$spacing-4: ${sp4}px;`,
     `$spacing-8: ${sp8}px;`,
+    ...scssShadowLines(shadows),
+    ...scssRadiusLines(radii),
   )
   return lines.join('\n')
 }
@@ -202,14 +250,8 @@ export function toSCSSVarsVariant(pair: ThemeVariantPair, widgets?: WidgetSelect
     lines.push(`// widgets: ${ids.length ? ids.join(', ') : '(none)'}`)
     lines.push(`$widgets: (${ids.map(id => `"${id}"`).join(', ')});`)
   }
-  for (const [variant, colors] of [['light', pair.light.colors], ['dark', pair.dark.colors]] as const) {
-    lines.push(
-      `$${variant}-color-primary: ${colors.primary};`,
-      `$${variant}-color-secondary: ${colors.secondary};`,
-      `$${variant}-color-background: ${colors.background};`,
-      `$${variant}-color-text: ${colors.text};`,
-    )
-  }
+  lines.push(...scssColorLines(pair.light.colors, 'light-'))
+  lines.push(...scssColorLines(pair.dark.colors, 'dark-'))
   lines.push(
     `$font-family: ${pair.light.typography.fontFamily};`,
     `$font-size-xs: ${tsXs}px;`,
@@ -221,22 +263,43 @@ export function toSCSSVarsVariant(pair: ThemeVariantPair, widgets?: WidgetSelect
     `$spacing-2: ${sp2}px;`,
     `$spacing-4: ${sp4}px;`,
     `$spacing-8: ${sp8}px;`,
+    ...scssShadowLines(pair.light.shadows),
+    ...scssRadiusLines(pair.light.radii),
   )
   return lines.join('\n')
 }
 
-// ── T-027 Style Dictionary export ─────────────────────────────────────────────
+// ── T-027 + T-114 Style Dictionary export ────────────────────────────────────
+
+function sdColorGroup(colors: ThemeConfig['colors']) {
+  const group: Record<string, { value: string; type: 'color' }> = {}
+  for (const k of Object.keys(colors) as Array<keyof typeof colors>) {
+    group[k] = { value: colors[k], type: 'color' }
+  }
+  return group
+}
+
+function sdShadowGroup(shadows: ThemeConfig['shadows']) {
+  const group: Record<string, { value: string; type: 'boxShadow' }> = {}
+  for (const k of Object.keys(shadows) as Array<keyof typeof shadows>) {
+    group[k] = { value: shadows[k], type: 'boxShadow' }
+  }
+  return group
+}
+
+function sdRadiusGroup(radii: ThemeConfig['radii']) {
+  const group: Record<string, { value: string; type: 'dimension' }> = {}
+  for (const k of Object.keys(radii) as Array<keyof typeof radii>) {
+    group[k] = { value: `${radii[k]}px`, type: 'dimension' }
+  }
+  return group
+}
 
 function sdTokens(config: ThemeConfig) {
   const [tsXs, tsSm, tsMd, tsLg] = typeScale(config.typography.baseSizePx, config.typography.scaleRatio)
   const [sp1, sp2, sp4, sp8] = spacingScale(config.spacing.baseUnitPx)
   return {
-    color: {
-      primary: { value: config.colors.primary, type: 'color' },
-      secondary: { value: config.colors.secondary, type: 'color' },
-      background: { value: config.colors.background, type: 'color' },
-      text: { value: config.colors.text, type: 'color' },
-    },
+    color: sdColorGroup(config.colors),
     typography: {
       fontFamily: { value: config.typography.fontFamily, type: 'fontFamily' },
       fontSizeXs: { value: `${tsXs}px`, type: 'fontSize' },
@@ -251,6 +314,8 @@ function sdTokens(config: ThemeConfig) {
       s4: { value: `${sp4}px`, type: 'dimension' },
       s8: { value: `${sp8}px`, type: 'dimension' },
     },
+    shadow: sdShadowGroup(config.shadows),
+    radius: sdRadiusGroup(config.radii),
   }
 }
 

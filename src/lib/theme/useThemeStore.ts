@@ -106,6 +106,21 @@ export function useThemeStore(initial: ThemeConfig = DEFAULT_THEME) {
     [state.theme, commitTheme],
   )
 
+  // T-123 — store actions for the new token groups (validated, undoable, partial)
+  const updateShadows = useCallback(
+    (partial: Partial<ThemeConfig['shadows']>) => {
+      commitTheme({ ...state.theme, shadows: { ...state.theme.shadows, ...partial } })
+    },
+    [state.theme, commitTheme],
+  )
+
+  const updateRadii = useCallback(
+    (partial: Partial<ThemeConfig['radii']>) => {
+      commitTheme({ ...state.theme, radii: { ...state.theme.radii, ...partial } })
+    },
+    [state.theme, commitTheme],
+  )
+
   const undo = useCallback(() => dispatch({ type: 'UNDO' }), [])
   const redo = useCallback(() => dispatch({ type: 'REDO' }), [])
 
@@ -116,6 +131,8 @@ export function useThemeStore(initial: ThemeConfig = DEFAULT_THEME) {
     updateTypography,
     updateSpacing,
     updateName,
+    updateShadows,
+    updateRadii,
     undo,
     redo,
     canUndo: state.past.length > 0,

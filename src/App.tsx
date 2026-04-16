@@ -164,6 +164,8 @@ export default function App() {
             onColorsChange={store.updateColors}
             onTypographyChange={store.updateTypography}
             onSpacingChange={store.updateSpacing}
+            onShadowsChange={store.updateShadows}
+            onRadiiChange={store.updateRadii}
             onNameChange={store.updateName}
             onPresetApply={(preset: ThemeConfig) => { store.commitTheme(preset) }}
             onReset={() => { store.commitTheme(DEFAULT_THEME) }}

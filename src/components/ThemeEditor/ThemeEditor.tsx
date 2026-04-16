@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import type { ThemeConfig } from '../../schema/theme'
-import { validateColorTokens, validateTypographyTokens, validateSpacingTokens } from '../../schema/theme'
+import {
+  validateColorTokens,
+  validateTypographyTokens,
+  validateSpacingTokens,
+  validateShadowTokens,
+  validateRadiusTokens,
+} from '../../schema/theme'
 import { PRESETS } from '../../lib/theme/presets'
 import styles from './ThemeEditor.module.css'
 
@@ -11,55 +17,88 @@ const FONT_OPTIONS = [
   { label: 'Inter', value: 'Inter, sans-serif' },
 ]
 
+const COLOR_SLOTS = [
+  'primary',
+  'secondary',
+  'background',
+  'text',
+  'muted',
+  'hairline',
+  'inkSoft',
+  'surfaceInvert',
+  'onInvert',
+] as const satisfies ReadonlyArray<keyof ThemeConfig['colors']>
+
+const SHADOW_SLOTS = ['primary', 'secondary', 'card', 'float'] as const satisfies ReadonlyArray<keyof ThemeConfig['shadows']>
+const RADIUS_SLOTS = ['pill', 'sm', 'md', 'lg', 'xl'] as const satisfies ReadonlyArray<keyof ThemeConfig['radii']>
+
 interface Props {
   theme: ThemeConfig
   onColorsChange: (c: Partial<ThemeConfig['colors']>) => void
   onTypographyChange: (t: Partial<ThemeConfig['typography']>) => void
   onSpacingChange: (s: Partial<ThemeConfig['spacing']>) => void
+  onShadowsChange: (s: Partial<ThemeConfig['shadows']>) => void
+  onRadiiChange: (r: Partial<ThemeConfig['radii']>) => void
   onNameChange: (name: string) => void
   onPresetApply: (preset: ThemeConfig) => void
   onReset: () => void
   onAdoptTheme: (candidate: unknown) => { success: boolean; errors?: Array<{ path: string; message: string }> }
 }
 
+type ColorErrorKeys = typeof COLOR_SLOTS[number]
+type ShadowErrorKeys = `shadow-${typeof SHADOW_SLOTS[number]}`
+type RadiusErrorKeys = `radius-${typeof RADIUS_SLOTS[number]}`
 type Errors = Partial<Record<
-  'primary' | 'secondary' | 'background' | 'text' |
+  ColorErrorKeys | ShadowErrorKeys | RadiusErrorKeys |
   'fontFamily' | 'baseSizePx' | 'scaleRatio' | 'baseUnitPx' | 'name',
   string
 >>
+
+function colorLabel(slot: typeof COLOR_SLOTS[number]): string {
+  // 'inkSoft' → 'Ink soft', 'surfaceInvert' → 'Surface invert'
+  return slot
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/^./, c => c.toUpperCase())
+}
 
 export default function ThemeEditor({
   theme,
   onColorsChange,
   onTypographyChange,
   onSpacingChange,
+  onShadowsChange,
+  onRadiiChange,
   onNameChange,
   onPresetApply,
   onReset,
 }: Props) {
   const [errors, setErrors] = useState<Errors>({})
-  // Local hex text state so user can type partial values
+  // Local hex draft for color text inputs (so user can type partial values).
   const [hexDraft, setHexDraft] = useState({ ...theme.colors })
+  // Local string draft for shadow textareas.
+  const [shadowDraft, setShadowDraft] = useState({ ...theme.shadows })
+  // Local number draft for radius inputs.
+  const [radiusDraft, setRadiusDraft] = useState({ ...theme.radii })
   // Sync drafts when theme changes externally (undo/redo/preset).
-  // Using the "store previous value" pattern so React reconciles in-place
-  // without cascading effect runs.
   const [prevTheme, setPrevTheme] = useState(theme)
   if (prevTheme !== theme) {
     setPrevTheme(theme)
     setHexDraft({ ...theme.colors })
+    setShadowDraft({ ...theme.shadows })
+    setRadiusDraft({ ...theme.radii })
     setErrors({})
   }
 
   // ── Color controls ──────────────────────────────────────────────────────────
 
-  const handleColorPicker = (slot: keyof ThemeConfig['colors']) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleColorPicker = (slot: typeof COLOR_SLOTS[number]) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     setHexDraft(prev => ({ ...prev, [slot]: val }))
     setErrors(prev => ({ ...prev, [slot]: undefined }))
     onColorsChange({ [slot]: val })
   }
 
-  const handleHexText = (slot: keyof ThemeConfig['colors']) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHexText = (slot: typeof COLOR_SLOTS[number]) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     setHexDraft(prev => ({ ...prev, [slot]: val }))
     const result = validateColorTokens({ ...theme.colors, [slot]: val })
@@ -123,6 +162,38 @@ export default function ThemeEditor({
     }
   }
 
+  // ── Shadow controls (T-125) ────────────────────────────────────────────────
+
+  const handleShadow = (slot: typeof SHADOW_SLOTS[number]) => (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value
+    setShadowDraft(prev => ({ ...prev, [slot]: val }))
+    const errKey = `shadow-${slot}` as const
+    const result = validateShadowTokens({ ...theme.shadows, [slot]: val })
+    if (result.success) {
+      setErrors(prev => ({ ...prev, [errKey]: undefined }))
+      onShadowsChange({ [slot]: val })
+    } else {
+      const err = result.errors.find(r => r.path === slot)
+      setErrors(prev => ({ ...prev, [errKey]: err?.message ?? 'Invalid box-shadow' }))
+    }
+  }
+
+  // ── Radius controls (T-126) ────────────────────────────────────────────────
+
+  const handleRadius = (slot: typeof RADIUS_SLOTS[number]) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value)
+    setRadiusDraft(prev => ({ ...prev, [slot]: val }))
+    const errKey = `radius-${slot}` as const
+    const result = validateRadiusTokens({ ...theme.radii, [slot]: val })
+    if (result.success) {
+      setErrors(prev => ({ ...prev, [errKey]: undefined }))
+      onRadiiChange({ [slot]: val })
+    } else {
+      const err = result.errors.find(r => r.path === slot || r.path === '')
+      setErrors(prev => ({ ...prev, [errKey]: err?.message ?? 'Invalid radius' }))
+    }
+  }
+
   // ── Name control ────────────────────────────────────────────────────────────
 
   const handleName = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,13 +224,13 @@ export default function ThemeEditor({
         </label>
       </section>
 
-      {/* ── Colors ───────────────────────────────────────────────────────── */}
+      {/* ── Colors (9 slots) ─────────────────────────────────────────────── */}
       <section className={styles.section}>
         <p className={styles.sectionTitle}>Colors</p>
-        {(['primary', 'secondary', 'background', 'text'] as const).map(slot => (
+        {COLOR_SLOTS.map(slot => (
           <div key={slot} className={styles.colorRow}>
             <label className={styles.field}>
-              <span className={styles.slotLabel}>{slot.charAt(0).toUpperCase() + slot.slice(1)}</span>
+              <span className={styles.slotLabel}>{colorLabel(slot)}</span>
               <div className={styles.colorInputs}>
                 <input
                   type="color"
@@ -245,6 +316,54 @@ export default function ThemeEditor({
           />
         </label>
         {errors.baseUnitPx && <span className={styles.error}>{errors.baseUnitPx}</span>}
+      </section>
+
+      {/* ── Shadows (T-125, 4 named CSS box-shadow strings) ──────────────── */}
+      <section className={styles.section}>
+        <p className={styles.sectionTitle}>Shadows</p>
+        {SHADOW_SLOTS.map(slot => {
+          const errKey = `shadow-${slot}` as const
+          return (
+            <div key={slot} className={styles.shadowRow}>
+              <label className={styles.stackField}>
+                <span className={styles.slotLabel}>{slot.charAt(0).toUpperCase() + slot.slice(1)}</span>
+                <textarea
+                  className={styles.shadowTextarea}
+                  value={shadowDraft[slot]}
+                  onChange={handleShadow(slot)}
+                  rows={2}
+                  spellCheck={false}
+                />
+              </label>
+              {errors[errKey] && <span className={styles.error}>{errors[errKey]}</span>}
+            </div>
+          )
+        })}
+      </section>
+
+      {/* ── Radii (T-126, 5 numeric pixel slots) ─────────────────────────── */}
+      <section className={styles.section}>
+        <p className={styles.sectionTitle}>Radii</p>
+        {RADIUS_SLOTS.map(slot => {
+          const errKey = `radius-${slot}` as const
+          return (
+            <div key={slot} className={styles.radiusRow}>
+              <label className={styles.field}>
+                <span className={styles.slotLabel}>{slot}</span>
+                <input
+                  type="number"
+                  className={styles.radiusInput}
+                  value={radiusDraft[slot]}
+                  onChange={handleRadius(slot)}
+                  min={0}
+                  max={9999}
+                  step={1}
+                />
+              </label>
+              {errors[errKey] && <span className={styles.error}>{errors[errKey]}</span>}
+            </div>
+          )
+        })}
       </section>
 
       {/* ── Presets ──────────────────────────────────────────────────────── */}

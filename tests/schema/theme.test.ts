@@ -14,6 +14,11 @@ describe('validateColorTokens', () => {
     secondary: '#001122',
     background: '#ffffff',
     text: '#000000',
+    muted: '#888888',
+    hairline: '#eeeeee',
+    inkSoft: '#222222',
+    surfaceInvert: '#111111',
+    onInvert: '#fafafa',
   }
 
   it('accepts valid color group', () => {
@@ -147,9 +152,26 @@ describe('validateSpacingTokens', () => {
 describe('validateThemeConfig', () => {
   const valid = {
     name: 'my-theme',
-    colors: { primary: '#aabbcc', secondary: '#001122', background: '#ffffff', text: '#000000' },
+    colors: {
+      primary: '#aabbcc',
+      secondary: '#001122',
+      background: '#ffffff',
+      text: '#000000',
+      muted: '#888888',
+      hairline: '#eeeeee',
+      inkSoft: '#222222',
+      surfaceInvert: '#111111',
+      onInvert: '#fafafa',
+    },
     typography: { fontFamily: 'Inter', baseSizePx: 16, scaleRatio: 1.25 },
     spacing: { baseUnitPx: 8 },
+    shadows: {
+      primary: '0 1px 2px #000',
+      secondary: '0 0 0 0.5px rgba(0,0,0,0.05)',
+      card: '0 4px 16px rgba(0,0,0,0.08)',
+      float: '0 8px 24px rgba(0,0,0,0.10)',
+    },
+    radii: { pill: 9999, sm: 4, md: 8, lg: 16, xl: 32 },
   }
 
   it('accepts full valid config', () => {
@@ -230,9 +252,14 @@ describe('validation surface properties', () => {
   it('validateThemeConfig accepts full valid config', () => {
     const r = validateThemeConfig({
       name: 'my-theme',
-      colors: { primary: '#aabbcc', secondary: '#001122', background: '#ffffff', text: '#000000' },
+      colors: {
+        primary: '#aabbcc', secondary: '#001122', background: '#ffffff', text: '#000000',
+        muted: '#888888', hairline: '#eeeeee', inkSoft: '#222222', surfaceInvert: '#111111', onInvert: '#fafafa',
+      },
       typography: { fontFamily: 'Inter', baseSizePx: 16, scaleRatio: 1.25 },
       spacing: { baseUnitPx: 8 },
+      shadows: { primary: '0 1px 2px #000', secondary: '0 0 0 #ccc', card: '0 4px 16px #000', float: '0 8px 24px #000' },
+      radii: { pill: 9999, sm: 4, md: 8, lg: 16, xl: 32 },
     })
     expect(r.success).toBe(true)
   })

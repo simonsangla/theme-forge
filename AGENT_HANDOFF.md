@@ -1,5 +1,97 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch 9 — Boundary Revision: Token Surface + Catalog Expansion
+
+**Date:** 2026-04-16
+**Status:** Complete. Boundary cavekit locks scope; schema gains 5 color slots + shadow group + radius group; widget catalog grows 8 → 11.
+
+### Scope
+
+Single coherent batch implementing the boundary-revision recommendation: lock the product surface as "theme + widget manifest generator" via a new `cavekit-product-boundary.md`, backfill the missing `cavekit-widgets.md`, and extend the schema + widget catalog with the cavekit-approved additions (5 color slots, 4 shadows, 5 radii, 3 new widget IDs, kpi-tile metric variant).
+
+### Domain additions
+
+| Cavekit | New | Notes |
+|---|---|---|
+| `cavekit-product-boundary.md` | 4 reqs | R1 in-scope, R2 hard-wall denials, R3 frozen 11-widget catalog, R4 cross-cutting purity invariants |
+| `cavekit-widgets.md` | 6 reqs | Backfills shipped widget-builder + previews + extends catalog to 11 IDs |
+| `cavekit-schema.md` (edited) | R1 expanded; R8 + R9 added | Color group → 9 slots; new shadow + radius groups; R4/R5/R7 updated to compose them |
+| `cavekit-overview.md` (edited) | 7 domains, 53 reqs | Cross-ref map + dependency graph updated |
+
+### Implementation deltas (29 tasks T-100..T-129, all DONE)
+
+**Schema (T-100..T-110):**
+- ColorTokenSchema: 4 → 9 slots (added muted, hairline, inkSoft, surfaceInvert, onInvert)
+- ShadowTokenSchema: 4 named CSS box-shadow strings (primary/secondary/card/float)
+- RadiusTokenSchema: 5 numeric pixel values with sm<=md<=lg<=xl ascending rule
+- ThemeConfigSchema, ThemeVariantPair: compose new groups + share-equality validation
+- DEFAULT_THEME: full 9 colors, 4 shadows, 5 radii (values from portfolio/DESIGN.md §2/§5/§6)
+- Widget catalog: WIDGET_IDS 8 → 11 (added badge, pricing-card, testimonial alphabetically)
+- Persistence: legacy 4-color records load with patched defaults; legacy 8-widget selections load with 3 new keys patched to false (read back-compat)
+
+**Exports (T-111..T-116):** every export function emits the new tokens
+- CSS Vars: --color-muted, --color-hairline, --color-ink-soft, --color-surface-invert, --color-on-invert; --shadow-* (4); --radius-* (5)
+- SCSS Vars: $color-* (5 new) + $shadow-* (4) + $radius-* (5)
+- Tailwind: theme.extend.colors gains 5 keys; new theme.extend.boxShadow + borderRadius
+- Style Dictionary: shadow group (type 'boxShadow') + radius group (type 'dimension')
+- JSON / TS: nested colors/shadows/radii surface naturally via the schema-extended object
+- Back-compat preserved: omitting widgets argument yields prior output exactly
+
+**Widget UI (T-117..T-122):**
+- WidgetSelector: 11 toggles (auto-grew with catalog)
+- WidgetPreview: 4 new arms (badge, pricing-card, testimonial, kpi-tile metric variant)
+- kpi-tile gains optional `variant?: 'tile' | 'metric'` prop — metric uses top-hairline + serif numeric + uppercase tracked label per portfolio/DESIGN.md §4.10/§6
+
+**Editor (T-123..T-126):**
+- Store actions: updateShadows, updateRadii (validated, undoable, partial)
+- 5 new color pickers with per-field error surface
+- Shadow editor: 4 monospaced textareas
+- Radius editor: 5 number inputs with per-field error
+
+**Wiring (T-127..T-129):**
+- themeToStyleVars: emits all new --color-*, --shadow-*, --radius- vars
+- App passes new store actions through to ThemeEditor; preview chrome inherits
+
+### Untouched (no drift)
+
+- Editor presets — existing presets gained the 5 new color slots + inherit shadow/radius defaults, list of 6 presets (Ocean, Dark, Warm, Forest, Slate, Pays Basque) preserved
+- Public API of WidgetSelector unchanged (still `selection` + `onChange`)
+- Persistence record version stays at 1 — read back-compat via missing-field patch, no migration needed
+- The 31-test widgets test suite from PR #18 stays green
+- Build-site.md primary file untouched (T-001..T-061 stays as historical truth)
+
+### Validation
+
+| Gate | Result |
+|---|---|
+| Lint | 0 errors |
+| Typecheck | pass |
+| Test | 220/220 pass (157 prior fixed + 63 new schema/persistence/widget coverage) |
+| Build | pass (vite ~108ms, 17.47kB CSS / 292kB JS) |
+| CI | (pending — see PR) |
+| Open Dependabot PRs at preflight | none |
+
+### Browser verification
+
+- 9-slot color editor + Shadow section + Radii section all rendered live
+- 11 themed preview cards with Pays Basque / Dark / Slate presets re-theming all of them within the same render cycle
+- JSON export shows the 5 new color slots in `colors`, plus widgets array reflecting selection
+- All persisted records (legacy + modern) round-trip without loss
+
+### Boundary cavekit content (R3 frozen catalog reference)
+
+Catalog: badge, button, card, empty-state, input, kpi-tile, modal, navbar, pricing-card, table, testimonial.
+Adding/removing/renaming any ID requires a dedicated boundary-revision PR.
+
+### Next recommended batch
+
+Two viable next directions (pick one — do not stack):
+
+1. **Variant-pair authoring UI.** The schema already supports `ThemeVariantPair` with shared shadows/radii (batch 9 extension); only a light/dark editor toggle and variant-aware export selection are missing. Closes the dark-mode export story.
+2. **Per-widget mini-config slot.** Tightly bounded: e.g., button shape (square/pill via radius token), table density, navbar position. Requires a small per-widget config schema plus minor export-shape extension. Boundary R2 currently denies "open-ended widget schema" — a per-widget config would need an explicit boundary R2 amendment.
+
+---
+
 ## Batch 8 — Widget Preview Cards (Primary Selector Surface)
 
 **Date:** 2026-04-16
