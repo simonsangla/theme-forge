@@ -1,5 +1,71 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch 2 — V1 Theme Editor + Live Preview
+
+**Date:** 2026-04-16
+**Merged commit:** `b5be5bc608868ead8a2d60bf4bc2915f311b7309` (PR #10)
+**Status:** Complete. All four gates green. V1 surface live.
+
+### Objective completed
+
+Scaffold-default UI replaced with minimal theme editor + live preview wired to export core.
+
+### Files changed
+
+| File | Action |
+|---|---|
+| `src/App.tsx` | Full rewrite — useReducer + Zod validation |
+| `src/App.module.css` | New — app shell layout |
+| `src/index.css` | Replaced — minimal reset |
+| `src/lib/theme/defaults.ts` | New — DEFAULT_THEME |
+| `src/lib/theme/applyTheme.ts` | New — themeToStyleVars() pure fn |
+| `src/components/ThemeEditor/ThemeEditor.tsx` | New |
+| `src/components/ThemeEditor/ThemeEditor.module.css` | New |
+| `src/components/ThemePreview/ThemePreview.tsx` | New |
+| `src/components/ThemePreview/ThemePreview.module.css` | New |
+| `src/App.css` | Deleted |
+| `src/assets/hero.png`, `react.svg`, `vite.svg` | Deleted |
+
+### V1 controls (ThemeEditor)
+
+- Accent color (`colors.primary`) — color picker
+- Background (`colors.background`) — color picker
+- Text color (`colors.text`) — color picker
+- Font family (`typography.fontFamily`) — select: System / Serif / Mono
+- Base size (`typography.baseSizePx`) — range 12–24px
+- Base spacing (`spacing.baseUnitPx`) — range 2–12px
+
+### V1 preview elements (ThemePreview)
+
+- Header bar (accent bg color)
+- Card: title + body text
+- Primary button (accent bg, spacing-driven padding)
+- Text input (themed bg/text/font)
+- Caption text
+- Collapsible CSS export panel (calls `toCSSVars` from export core)
+
+### Schema changes: none
+### Export core changes: none
+
+### Gate status
+
+| Gate | Local | CI |
+|---|---|---|
+| lint | PASS | PASS |
+| typecheck | PASS | PASS |
+| test | PASS (6/6) | PASS |
+| build | PASS (101 modules) | PASS |
+
+### Next recommended batch
+
+**Batch 3 — Export actions + named themes**
+- Add "Export JSON" and "Copy CSS" buttons wired to `toJSON`/`toCSSVars`/`toTSObject`
+- Add 3–4 preset named themes selectable from a dropdown
+- Add theme name input (already in schema)
+- No new dependencies required
+
+---
+
 ## Fix Batch 2 — Build gate
 
 **Date:** 2026-04-16
