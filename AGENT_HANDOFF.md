@@ -1,5 +1,58 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch 8 — Widget Preview Cards (Primary Selector Surface)
+
+**Date:** 2026-04-16
+**Status:** Complete. Widget catalog now selected via themed preview cards instead of text checkboxes.
+
+### Scope
+
+Narrow correction batch on top of PR #18 (widget-builder). Replaced the text-only checkbox grid in `WidgetSelector` with clickable preview cards. Each card is a `<button role="switch">` containing a small read-only mini-rendering of its widget (button, card, empty-state, input, kpi-tile, modal, navbar, table). Cards inherit theme tokens via CSS custom properties, so swapping the active theme (or applying a preset) re-themes all 8 previews live. Cards visually reflect selection (full opacity + accent ring when selected; dimmed when not). The `Select all` / `Clear` bulk actions and the `N/8 selected` count are retained.
+
+### Disposition
+
+| Change | File(s) |
+|---|---|
+| New: read-only widget mini-rendering | `src/components/WidgetSelector/WidgetPreview.tsx`, `WidgetPreview.module.css` |
+| Modified: WidgetSelector now uses card toggles | `src/components/WidgetSelector/WidgetSelector.tsx`, `WidgetSelector.module.css` |
+| New: behavior + export-linkage tests | `tests/components/WidgetSelector.test.tsx` (8 tests) |
+| Carry-forward: `.vercel` to gitignore | `.gitignore` |
+
+### Untouched (no drift)
+
+- `src/schema/widgets.ts` — manifest model unchanged
+- `src/export/exportTheme.ts` — pure / Node-safe / unchanged
+- `src/lib/persistence/` — no record-shape change
+- `src/App.tsx` — already provides themed CSS-var context
+- The 31-test widget suite from PR #18 stays untouched and passing
+
+### Validation
+
+| Gate | Result |
+|---|---|
+| Lint | 0 errors |
+| Typecheck | pass |
+| Test | 153/153 pass (145 prior + 8 new behavior/linkage) |
+| Build | pass (vite, ~97ms) |
+| CI | (pending — see PR) |
+| Open Dependabot PRs at preflight | none (`gh pr list --author app/dependabot --state open` empty) |
+
+### Key UX guarantees verified in browser preview
+
+- 8 themed preview cards render with the active theme (Pays Basque red/green/cream confirmed visually)
+- Toggling preset → all 8 previews re-theme instantly (no toggle on widgets needed)
+- Click card → `aria-checked` flips, card opacity flips, JSON export `widgets` array updates within the same tick
+- `Select all` / `Clear` toggle every card; topbar `N widgets in export` badge stays in sync
+
+### Next recommended batch
+
+Two viable next-step candidates (pick one — do not stack):
+
+1. **Variant-pair authoring UI.** Schema (`ThemeVariantPairSchema`) and persistence-record extension already exist; only a light/dark editor surface and a variant-aware selector in `ExportPanel` are missing. Would close out the "dark-mode export" story.
+2. **Per-widget mini-config slot.** Tightly bounded — e.g. button shape (square/pill), table density (compact/regular), navbar position (top/side). Would require a small widget-config schema slice and minor export-shape extension. Only do this if user genuinely wants more design surface; current bounded model is the right default.
+
+---
+
 ## Batch 6 — Dependabot Triage (PRs #1–#5)
 
 **Date:** 2026-04-16

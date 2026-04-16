@@ -1,9 +1,10 @@
 /**
- * WidgetSelector — V1 widget builder surface.
+ * WidgetSelector — V1 widget builder surface (preview-card variant).
  *
- * Constrained checkbox grid for the fixed canonical widget catalog.
- * No drag-and-drop, no layout, no per-widget config beyond on/off.
- * Selection bubbles up to the App and flows into every export format.
+ * Each widget in the fixed catalog is presented as a clickable preview card.
+ * The card itself is the toggle — there is no separate text-only checkbox row.
+ * Click → flips inclusion. Visual state mirrors selection. Previews are
+ * read-only and themed via inherited CSS vars.
  */
 import { useCallback } from 'react'
 import {
@@ -12,6 +13,7 @@ import {
   type WidgetId,
   type WidgetSelection,
 } from '../../schema/widgets'
+import WidgetPreview from './WidgetPreview'
 import styles from './WidgetSelector.module.css'
 
 interface Props {
@@ -47,7 +49,7 @@ export default function WidgetSelector({ selection, onChange }: Props) {
         </span>
       </header>
       <p className={styles.hint}>
-        Choose which widgets to include in the export package.
+        Click a card to include or exclude it from the export package.
       </p>
 
       <div className={styles.bulkRow}>
@@ -74,16 +76,20 @@ export default function WidgetSelector({ selection, onChange }: Props) {
           const checked = selection[id]
           return (
             <li key={id}>
-              <label className={`${styles.item} ${checked ? styles.itemOn : ''}`}>
-                <input
-                  type="checkbox"
-                  className={styles.checkbox}
-                  checked={checked}
-                  onChange={() => toggle(id)}
-                  data-widget-id={id}
-                />
-                <span className={styles.label}>{WIDGET_LABELS[id]}</span>
-              </label>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={checked}
+                aria-label={WIDGET_LABELS[id]}
+                data-widget-id={id}
+                className={`${styles.cardBtn} ${checked ? styles.cardSelected : ''}`}
+                onClick={() => toggle(id)}
+              >
+                <span className={styles.cardPreview}>
+                  <WidgetPreview widget={id} />
+                </span>
+                <span className={styles.cardLabel}>{WIDGET_LABELS[id]}</span>
+              </button>
             </li>
           )
         })}
