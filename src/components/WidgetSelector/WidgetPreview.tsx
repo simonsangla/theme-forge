@@ -2,22 +2,37 @@
  * WidgetPreview — read-only mini-rendering of a single catalog widget.
  *
  * Pure presentational. Themed entirely via inherited CSS custom properties
- * (`--color-primary`, `--color-secondary`, `--color-background`, `--color-text`,
- * `--font-family`, `--font-size-base`, `--spacing-base`) provided by App.tsx.
+ * provided by App.tsx (--color-*, --shadow-*, --radius-*, --font-family,
+ * --font-size-base, --spacing-base).
  *
  * No state, no handlers, no dependencies on theme objects — the preview
- * automatically reflects whatever theme the parent has applied. All copy
- * is fixed deterministic.
+ * automatically reflects whatever theme the parent has applied. All copy is
+ * fixed deterministic.
+ *
+ * Catalog: 11 widgets (T-103). kpi-tile supports an optional 'metric' visual
+ * variant that swaps to a top-hairline + serif-numeric layout (T-121).
  */
 import type { WidgetId } from '../../schema/widgets'
 import styles from './WidgetPreview.module.css'
 
 interface Props {
   widget: WidgetId
+  /** kpi-tile only: 'tile' (default) or 'metric' (top-hairline serif) */
+  variant?: 'tile' | 'metric'
 }
 
-export default function WidgetPreview({ widget }: Props) {
+export default function WidgetPreview({ widget, variant }: Props) {
   switch (widget) {
+    case 'badge':
+      return (
+        <div className={styles.preview} data-widget-preview="badge">
+          <div className={styles.badgeRow}>
+            <span className={`${styles.badge} ${styles.badgeSolid}`}>Active</span>
+            <span className={`${styles.badge} ${styles.badgeOutline}`}>Beta</span>
+          </div>
+        </div>
+      )
+
     case 'button':
       return (
         <div className={styles.preview} data-widget-preview="button">
@@ -55,15 +70,30 @@ export default function WidgetPreview({ widget }: Props) {
         </div>
       )
 
-    case 'kpi-tile':
+    case 'kpi-tile': {
+      const isMetric = variant === 'metric'
       return (
-        <div className={styles.preview} data-widget-preview="kpi-tile">
-          <div className={styles.kpiBox}>
-            <div className={styles.kpiValue}>1,284</div>
-            <div className={styles.kpiLabel}>Active users <span className={styles.kpiTrend}>▲</span></div>
-          </div>
+        <div
+          className={styles.preview}
+          data-widget-preview="kpi-tile"
+          data-variant={isMetric ? 'metric' : 'tile'}
+        >
+          {isMetric ? (
+            <div className={styles.metricBox}>
+              <div className={styles.metricValue}>1,284</div>
+              <div className={styles.metricLabel}>Active users</div>
+            </div>
+          ) : (
+            <div className={styles.kpiBox}>
+              <div className={styles.kpiValue}>1,284</div>
+              <div className={styles.kpiLabel}>
+                Active users <span className={styles.kpiTrend}>▲</span>
+              </div>
+            </div>
+          )}
         </div>
       )
+    }
 
     case 'modal':
       return (
@@ -94,6 +124,24 @@ export default function WidgetPreview({ widget }: Props) {
         </div>
       )
 
+    case 'pricing-card':
+      return (
+        <div className={styles.preview} data-widget-preview="pricing-card">
+          <div className={styles.pricingBox}>
+            <div className={styles.pricingHeader}>Pro</div>
+            <div className={styles.pricingPrice}>
+              <span className={styles.pricingNumber}>$29</span>
+              <span className={styles.pricingPeriod}>/mo</span>
+            </div>
+            <ul className={styles.pricingList}>
+              <li>★ Unlimited projects</li>
+              <li>★ Priority support</li>
+            </ul>
+            <span className={`${styles.btn} ${styles.btnInverse} ${styles.btnSm}`}>Choose</span>
+          </div>
+        </div>
+      )
+
     case 'table':
       return (
         <div className={styles.preview} data-widget-preview="table">
@@ -112,6 +160,25 @@ export default function WidgetPreview({ widget }: Props) {
               <span>Beta</span>
               <span>Pending</span>
               <span>Apr 15</span>
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'testimonial':
+      return (
+        <div className={styles.preview} data-widget-preview="testimonial">
+          <div className={styles.testimonialBox}>
+            <div className={styles.testimonialQuote}>“</div>
+            <div className={styles.testimonialBody}>
+              Shipped twice as fast.
+            </div>
+            <div className={styles.testimonialAttrib}>
+              <span className={styles.testimonialAvatar}>A</span>
+              <span>
+                <span className={styles.testimonialName}>Avery Chen</span>
+                <span className={styles.testimonialRole}>CTO, Acme</span>
+              </span>
             </div>
           </div>
         </div>

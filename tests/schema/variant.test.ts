@@ -1,18 +1,33 @@
 import { describe, it, expect } from 'vitest'
 import { validateThemeVariantPair, validateThemeConfig } from '../../src/schema/theme'
+import { DEFAULT_THEME } from '../../src/lib/theme/defaults'
 
-// T-005: Theme variant pair (R5)
+// T-005: Theme variant pair (R5) — extended in batch 9 to require shared shadows + radii
 
 const lightConfig = {
+  ...DEFAULT_THEME,
   name: 'light',
-  colors: { primary: '#6366f1', secondary: '#8b5cf6', background: '#ffffff', text: '#111827' },
+  colors: {
+    ...DEFAULT_THEME.colors,
+    primary: '#6366f1',
+    secondary: '#8b5cf6',
+    background: '#ffffff',
+    text: '#111827',
+  },
   typography: { fontFamily: 'Inter', baseSizePx: 16, scaleRatio: 1.25 },
   spacing: { baseUnitPx: 4 },
 }
 
 const darkConfig = {
+  ...DEFAULT_THEME,
   name: 'dark',
-  colors: { primary: '#818cf8', secondary: '#a78bfa', background: '#111827', text: '#f9fafb' },
+  colors: {
+    ...DEFAULT_THEME.colors,
+    primary: '#818cf8',
+    secondary: '#a78bfa',
+    background: '#111827',
+    text: '#f9fafb',
+  },
   typography: { fontFamily: 'Inter', baseSizePx: 16, scaleRatio: 1.25 },
   spacing: { baseUnitPx: 4 },
 }
@@ -98,6 +113,25 @@ describe('validateThemeVariantPair', () => {
 
   it('rejects extra fields (.strict)', () => {
     expect(validateThemeVariantPair({ ...validPair, extra: true }).success).toBe(false)
+  })
+
+  // Batch 9 — variant pair must share shadows + radii
+  it('rejects differing shadows between variants', () => {
+    const r = validateThemeVariantPair({
+      ...validPair,
+      dark: { ...darkConfig, shadows: { ...darkConfig.shadows, primary: 'inset 0 0 0 #fff' } },
+    })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.errors.some((e) => e.path.includes('shadows'))).toBe(true)
+  })
+
+  it('rejects differing radii between variants', () => {
+    const r = validateThemeVariantPair({
+      ...validPair,
+      dark: { ...darkConfig, radii: { ...darkConfig.radii, sm: 99 } },
+    })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.errors.some((e) => e.path.includes('radii'))).toBe(true)
   })
 })
 

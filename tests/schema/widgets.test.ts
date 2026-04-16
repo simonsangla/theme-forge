@@ -9,8 +9,9 @@ import {
 } from '../../src/schema/widgets'
 
 describe('widget catalog', () => {
-  it('is the canonical 8-widget V1 set', () => {
+  it('is the canonical 11-widget catalog (boundary R3)', () => {
     expect(WIDGET_IDS).toEqual([
+      'badge',
       'button',
       'card',
       'empty-state',
@@ -18,8 +19,20 @@ describe('widget catalog', () => {
       'kpi-tile',
       'modal',
       'navbar',
+      'pricing-card',
       'table',
+      'testimonial',
     ])
+  })
+
+  it('catalog has exactly 11 IDs', () => {
+    expect(WIDGET_IDS.length).toBe(11)
+  })
+
+  it('includes the 3 batch-9 additions: badge, pricing-card, testimonial', () => {
+    expect(WIDGET_IDS).toContain('badge')
+    expect(WIDGET_IDS).toContain('pricing-card')
+    expect(WIDGET_IDS).toContain('testimonial')
   })
 
   it('every id has a human label', () => {
