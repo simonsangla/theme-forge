@@ -1,5 +1,44 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch 3 — Bootstrap Skill Draft + Execution Rules
+
+**Date:** 2026-04-16
+**Merged commit:** `87bbd0c4cf1f815113bc45eae309888052a1f28f` (PR #12)
+**Status:** Complete. All four gates green.
+
+### What was done
+
+- Created `docs/skills/repo-bootstrap/SKILL.md` — first-draft bootstrap skill (239 lines, DRAFT status, 10 sections)
+- Updated `AGENTS.md` — added PR merge review guardrail to Execution Discipline section
+
+### Files changed
+
+| File | Action |
+|---|---|
+| `docs/skills/repo-bootstrap/SKILL.md` | New — bootstrap skill draft |
+| `AGENTS.md` | Updated — PR merge review rule added |
+
+### Skill scan findings
+
+- `anthropics/skills@skill-creator` (151.6K installs) — used to guide structure
+- `finishing-a-development-branch`, `pr`, `requesting-code-review` — relevant git/PR patterns, referenced in skill execution sequence
+- No existing repo-bootstrap skill found locally or in skills ecosystem with sufficient quality/install count
+- skill-creator path used: extract-from-conversation (4 batches of observed evidence)
+
+### Proven findings captured in skill
+
+13 proven findings, 5 failure modes, 30+ step execution checklist, 7-item validation contract, explicit DRAFT status, provisional items labeled.
+
+### Next action
+
+**Batch 3 product work (export actions + preset themes):**
+- Add "Export JSON" and "Copy CSS" buttons wired to `toJSON`/`toCSSVars`/`toTSObject`
+- Add 3–4 preset named themes selectable from dropdown
+- Add theme name input (already in schema)
+- No new dependencies required
+
+---
+
 ## Batch 2 — V1 Theme Editor + Live Preview
 
 **Date:** 2026-04-16
