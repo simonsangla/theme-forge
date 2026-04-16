@@ -86,13 +86,15 @@ Defines the canonical data model for a theme: token groups (color, typography, s
 **Dependencies:** R4
 
 ### R8: Shadow Token Group
-**Description:** A theme must define a shadow token group with four named CSS box-shadow strings used by widget previews and emitted into every export.
+**Description:** A theme must define a shadow token group with four named CSS box-shadow strings used by widget previews and emitted into every export. Shadow values are interpolated raw into CSS / SCSS / Tailwind exports, so the validator MUST reject characters that would let a malicious or malformed value escape its declaration and inject unrelated CSS into the emitted artifact.
 **Acceptance Criteria:**
 - [ ] The group contains exactly the slots: primary, secondary, card, float
-- [ ] Each slot value is a non-empty string conforming to CSS box-shadow syntax (one or more layers separated by commas; each layer is offsets + optional blur + optional spread + color, with optional inset prefix)
+- [ ] Each slot value is a non-empty string
+- [ ] Validation rejects shadow values containing any of the following characters or sequences anywhere in the string: `;`, `}`, `{`, `/*`, `*/`, `\n`, `\r`, `<`, `>`. (These characters are sufficient to break out of `:root { --shadow-x: VALUE; }` in CSS exports or `$shadow-x: VALUE;` in SCSS exports.)
 - [ ] Validation rejects empty strings or non-string values
 - [ ] Validation rejects shadow groups missing any required slot
 - [ ] Validation rejects shadow groups containing slots not in the required set
+- [ ] DEFAULT_THEME and all built-in presets pass the tightened validator
 **Dependencies:** none
 
 ### R9: Radius Token Group
@@ -128,4 +130,6 @@ Defines the canonical data model for a theme: token groups (color, typography, s
 
 ## Changelog
 - 2026-04-16: Initial draft.
+- 2026-04-16 (Batch 9): Color group expanded to 9 slots (added muted, hairline, inkSoft, surfaceInvert, onInvert). Added shadow token group (R8) and radius token group (R9). Theme configuration and variant pair validation updated to compose them.
+- 2026-04-16 (Batch 10): R8 tightened — shadow values now reject CSS-injection vectors (`;` `}` `{` `/*` `*/` `\n` `\r` `<` `>`) so untrusted imported themes cannot break out of the `:root { ... }` declaration in CSS / SCSS / Tailwind exports.
 - 2026-04-16: Boundary revision (Batch 9). Color group extended to 9 slots (added muted, hairline, inkSoft, surfaceInvert, onInvert). Added shadow token group (R8) and radius token group (R9). Theme configuration and variant pair validation updated to compose them.

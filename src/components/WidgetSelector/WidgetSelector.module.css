@@ -120,3 +120,42 @@
   color: #333;
   text-align: center;
 }
+
+/* T-134 — kpi-tile variant toggle (tile / metric) */
+
+.variantRow {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  justify-content: center;
+}
+
+.variantBtn {
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid #ddd;
+  border-radius: 9999px;
+  background: #fff;
+  color: #888;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.variantBtn:hover {
+  border-color: #aaa;
+  color: #333;
+}
+
+.variantBtnActive {
+  background: var(--color-primary, #6366f1);
+  color: var(--color-background, #fff);
+  border-color: var(--color-primary, #6366f1);
+}
+
+.variantBtnActive:hover {
+  color: var(--color-background, #fff);
+}

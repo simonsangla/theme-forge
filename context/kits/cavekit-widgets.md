@@ -44,14 +44,17 @@ The widget manifest layer: a fixed catalog of UI widgets that the user toggles f
 **Dependencies:** R1
 
 ### R4: Live Themed Widget Previews
-**Description:** Each card renders a small read-only mini-rendering of its widget using the active theme tokens. Previews automatically re-theme when the active theme changes (preset apply, undo/redo, import). The kpi-tile widget supports two visual variants: a default tile rendering and a "metric" variant (top hairline border + serif numeric value + uppercase tracked label).
+**Description:** Each card renders a small read-only mini-rendering of its widget using the active theme tokens. Previews automatically re-theme when the active theme changes (preset apply, undo/redo, import). The kpi-tile widget supports two visual variants: a default tile rendering and a "metric" variant (top hairline border + serif numeric value + uppercase tracked label). The variant is user-selectable via a small in-card toggle on the kpi-tile preview only — no other widget exposes per-widget configuration. The selection is transient (per-session, not persisted) and influences only how the preview renders; export emission of the kpi-tile manifest entry is identical regardless of variant.
 **Acceptance Criteria:**
 - [ ] Each catalog ID has a dedicated preview rendering
 - [ ] All preview copy is fixed deterministic strings (no clocks, no randomness, no fetched data)
 - [ ] Previews consume theme tokens via inherited CSS custom properties (no inline color literals)
 - [ ] Switching theme presets re-themes every preview within the same render cycle
 - [ ] kpi-tile renders the default tile variant by default
-- [ ] kpi-tile renders the metric variant when the corresponding visual mode is selected
+- [ ] kpi-tile renders the metric variant when the user clicks the in-card variant toggle
+- [ ] Only the kpi-tile preview exposes a variant toggle; no other widget gains per-widget configuration UI
+- [ ] The toggle has accessible labels for both states (Tile / Metric) and reflects the active variant via aria-pressed or aria-checked
+- [ ] The variant choice is per-session (not persisted to localStorage) and does not appear in any export format
 - [ ] Previews never trigger network, storage, or DOM-mutation side effects
 **Dependencies:** R1, cavekit-product-boundary R4
 
@@ -93,3 +96,4 @@ The widget manifest layer: a fixed catalog of UI widgets that the user toggles f
 
 ## Changelog
 - 2026-04-16: Initial cavekit. Backfills shipped 8-widget surface; extends catalog to 11 (adds badge, pricing-card, testimonial). kpi-tile gains a "metric" visual variant absorbing the proposed metric-stat widget.
+- 2026-04-16 (Batch 10): R4 clarified — kpi-tile metric variant is user-selectable via an in-card toggle (transient per-session, not persisted, not in export). Codifies the boundary that no other widget exposes per-widget configuration UI.
