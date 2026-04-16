@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import type { ThemeConfig } from '../../schema/theme'
 import { validateColorTokens, validateTypographyTokens, validateSpacingTokens } from '../../schema/theme'
 import { PRESETS } from '../../lib/theme/presets'
@@ -40,16 +40,15 @@ export default function ThemeEditor({
   const [errors, setErrors] = useState<Errors>({})
   // Local hex text state so user can type partial values
   const [hexDraft, setHexDraft] = useState({ ...theme.colors })
-  // Track when theme changes externally (undo/redo/preset) to reset drafts
-  const prevThemeRef = useRef(theme)
-
-  useEffect(() => {
-    if (prevThemeRef.current !== theme) {
-      setHexDraft({ ...theme.colors })
-      setErrors({})
-      prevThemeRef.current = theme
-    }
-  }, [theme])
+  // Sync drafts when theme changes externally (undo/redo/preset).
+  // Using the "store previous value" pattern so React reconciles in-place
+  // without cascading effect runs.
+  const [prevTheme, setPrevTheme] = useState(theme)
+  if (prevTheme !== theme) {
+    setPrevTheme(theme)
+    setHexDraft({ ...theme.colors })
+    setErrors({})
+  }
 
   // ── Color controls ──────────────────────────────────────────────────────────
 

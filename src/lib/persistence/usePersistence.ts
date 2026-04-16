@@ -1,35 +1,32 @@
 /**
- * T-033 / T-037: Hook that wires auto-save + availability detection.
+ * Hook that wires auto-save + availability detection.
  *
  * Returns:
  * - loadResult  — result of the initial load (for App to act on)
- * - save(theme) — persists the theme; returns save result
+ * - save(theme, widgets) — persists the payload; returns save result
  * - clear()     — removes the persisted record
  * - storageOk   — false if localStorage unavailable at mount
  */
 
-import { useRef, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import type { ThemeConfig } from '../../schema/theme'
+import type { WidgetSelection } from '../../schema/widgets'
 import { loadTheme, saveTheme, clearTheme, isStorageAvailable, type LoadResult, type SaveResult } from './storage'
 
 export interface PersistenceHook {
   loadResult: LoadResult
-  save: (theme: ThemeConfig) => SaveResult
+  save: (theme: ThemeConfig, widgets: WidgetSelection) => SaveResult
   clear: () => void
   storageOk: boolean
 }
 
 export function usePersistence(): PersistenceHook {
-  // Load once at mount time — stable ref, never changes
-  const loadResultRef = useRef<LoadResult | null>(null)
-  if (loadResultRef.current === null) {
-    loadResultRef.current = loadTheme()
-  }
+  // Load once at mount via lazy initializer — stable for the lifetime of the hook
+  const [loadResult] = useState<LoadResult>(() => loadTheme())
+  const [storageOk] = useState<boolean>(() => isStorageAvailable())
 
-  const storageOk = isStorageAvailable()
-
-  const save = useCallback((theme: ThemeConfig): SaveResult => {
-    return saveTheme(theme)
+  const save = useCallback((theme: ThemeConfig, widgets: WidgetSelection): SaveResult => {
+    return saveTheme(theme, widgets)
   }, [])
 
   const clear = useCallback(() => {
@@ -37,7 +34,7 @@ export function usePersistence(): PersistenceHook {
   }, [])
 
   return {
-    loadResult: loadResultRef.current,
+    loadResult,
     save,
     clear,
     storageOk,

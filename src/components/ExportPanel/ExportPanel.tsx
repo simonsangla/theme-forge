@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import type { ThemeConfig } from '../../schema/theme'
+import type { WidgetSelection } from '../../schema/widgets'
 import {
   toJSON, toCSSVars, toTSObject, toTailwindConfig, toSCSSVars, toStyleDictionary,
 } from '../../export/exportTheme'
@@ -12,7 +13,7 @@ interface FormatMeta {
   id: Format
   label: string
   ext: string
-  generate: (theme: ThemeConfig) => string
+  generate: (theme: ThemeConfig, widgets?: WidgetSelection) => string
 }
 
 const FORMATS: FormatMeta[] = [
@@ -30,15 +31,16 @@ function toSafeFilename(name: string): string {
 
 interface Props {
   theme: ThemeConfig
+  widgets: WidgetSelection
 }
 
-export default function ExportPanel({ theme }: Props) {
+export default function ExportPanel({ theme, widgets }: Props) {
   const [format, setFormat] = useState<Format>('json')
   const [copyStatus, setCopyStatus] = useState<'idle' | 'ok' | 'err'>('idle')
 
   const meta = FORMATS.find(f => f.id === format)!
   // T-032 / R11: generation is pure — no mutation, no undo entry, no persist write
-  const output = meta.generate(theme)
+  const output = meta.generate(theme, widgets)
 
   // T-030 / R9 — copy exact displayed output
   const handleCopy = useCallback(async () => {
@@ -92,7 +94,7 @@ export default function ExportPanel({ theme }: Props) {
       </div>
 
       {/* Monospaced output — T-029 / R8 */}
-      <pre className={styles.code}>{output}</pre>
+      <pre className={styles.code} data-testid="export-output">{output}</pre>
     </div>
   )
 }

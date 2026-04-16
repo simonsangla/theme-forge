@@ -5,19 +5,28 @@ import { usePersistence } from './lib/persistence/usePersistence'
 import { validateThemeConfig } from './schema/theme'
 import type { ThemeConfig } from './schema/theme'
 import { DEFAULT_THEME } from './lib/theme/defaults'
+import {
+  type WidgetSelection,
+  DEFAULT_WIDGET_SELECTION,
+  selectedWidgetIds,
+} from './schema/widgets'
 import ThemeEditor from './components/ThemeEditor/ThemeEditor'
 import ThemePreview from './components/ThemePreview/ThemePreview'
 import ExportPanel from './components/ExportPanel/ExportPanel'
+import WidgetSelector from './components/WidgetSelector/WidgetSelector'
 import styles from './App.module.css'
 
 export default function App() {
   const persistence = usePersistence()
 
-  // T-034: resolve initial theme from persistence
+  // T-034: resolve initial theme + widgets from persistence
   const initialTheme: ThemeConfig =
     persistence.loadResult.status === 'ok' ? persistence.loadResult.theme : DEFAULT_THEME
+  const initialWidgets: WidgetSelection =
+    persistence.loadResult.status === 'ok' ? persistence.loadResult.widgets : DEFAULT_WIDGET_SELECTION
 
   const store = useThemeStore(initialTheme)
+  const [widgets, setWidgets] = useState<WidgetSelection>(initialWidgets)
 
   // T-034 (cold-load): mark restored theme as initial history state
   const [coldLoadDone, setColdLoadDone] = useState(false)
@@ -32,14 +41,14 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // T-033: auto-save on every theme change
+  // T-033: auto-save on theme OR widgets change
   const [saveError, setSaveError] = useState<string | null>(null)
   useEffect(() => {
-    const result = persistence.save(store.theme)
+    const result = persistence.save(store.theme, widgets)
     if (result === 'quota') setSaveError('Storage quota exceeded — changes not saved.')
     else if (result === 'unavailable') setSaveError(null) // storageNotice already shown
     else setSaveError(null)
-  }, [store.theme, persistence])
+  }, [store.theme, widgets, persistence])
 
   // T-034: corrupt theme notice
   const [corruptNotice, setCorruptNotice] = useState<string | null>(
@@ -101,11 +110,16 @@ export default function App() {
     e.target.value = ''
   }, [store])
 
+  const widgetCount = selectedWidgetIds(widgets).length
+
   return (
     <div className={styles.app} style={themeToStyleVars(store.theme) as CSSProperties}>
       {/* Topbar */}
       <header className={styles.topbar}>
         <span className={styles.brand}>theme-forge</span>
+        <span className={styles.widgetBadge} data-testid="widget-badge">
+          {widgetCount} widget{widgetCount === 1 ? '' : 's'} in export
+        </span>
         <div className={styles.topbarActions}>
           <button
             type="button"
@@ -172,8 +186,11 @@ export default function App() {
         <main className={styles.canvas}>
           <ThemePreview theme={store.theme} />
 
-          {/* Export panel — T-028-T-032 */}
-          <ExportPanel theme={store.theme} />
+          {/* Widget selection — flow step 2 (theme → widgets → export) */}
+          <WidgetSelector selection={widgets} onChange={setWidgets} />
+
+          {/* Export panel — receives both theme + widgets */}
+          <ExportPanel theme={store.theme} widgets={widgets} />
 
           {/* Import section — T-038 / T-039 */}
           <section className={styles.importSection}>

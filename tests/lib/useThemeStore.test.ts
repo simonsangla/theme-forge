@@ -126,7 +126,6 @@ describe('useThemeStore — T-009 undo/redo', () => {
     const { result } = renderHook(() => useThemeStore())
     // commit 52 distinct changes
     for (let i = 0; i < 52; i++) {
-      const hex = `#${i.toString(16).padStart(2, '0')}0000`
       act(() => {
         result.current.commitTheme({
           ...DEFAULT_THEME,
