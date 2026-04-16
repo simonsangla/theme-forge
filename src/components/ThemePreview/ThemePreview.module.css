@@ -2,18 +2,45 @@
 .preview {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 600px;
+  max-width: 640px;
+}
+
+/* Header strip — app chrome, no theme tokens */
+.previewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 10px;
+  gap: 12px;
+}
+
+.previewLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #9ca3af;
+}
+
+.previewThemeName {
+  font-size: 11px;
+  color: #6b7280;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
 }
 
 /* Canvas — tokens scoped here via inline style (T-017 / R1) */
 .canvas {
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #e5e7eb;
   background: var(--color-background);
   font-family: var(--font-family);
   color: var(--color-text);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.12);
 }
 
 /* App bar using primary color */
@@ -34,10 +61,10 @@
 }
 
 .body {
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 /* ── Type scale ─────────────────────────────────────────────────── */
@@ -45,7 +72,7 @@
 .typeScale {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
 /* ── Spacing visualization ──────────────────────────────────────── */

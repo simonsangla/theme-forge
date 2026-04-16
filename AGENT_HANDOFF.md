@@ -1,5 +1,47 @@
 # AGENT HANDOFF — theme-forge
 
+## Batch A — UI hierarchy + payoff surface
+
+**Date:** 2026-04-16
+**Status:** Complete. Pure UI reorganization + visual polish. Zero schema / persistence / export-core changes. No new tests required; all 267 existing tests remain green.
+
+### Scope
+
+Five UI improvements, all file-isolated to `src/App.*`, `src/components/*`. Boundary preserved: still a theme + widget manifest generator.
+
+| Area | Change | Key files |
+|---|---|---|
+| Left rail regroup | Identity (name + presets) → Colors → Typography → Spacing → Advanced (collapsed). Native `<details>` collapsible with matched `.summary` styling. | `ThemeEditor.tsx`, `ThemeEditor.module.css` |
+| Preview frame | Added a chrome header strip ("Preview" eyebrow + theme name, outside scoped vars) and a framed canvas with 12px radius + subtle shadow. Body padding bumped 20→24px. | `ThemePreview.tsx`, `ThemePreview.module.css` |
+| Widget gallery states | Dropped opacity-dim unselected pattern. Unselected = white card + neutral hairline. Hover = primary hairline + 1px lift. Selected = 2px primary ring + check-badge in top-right corner. `role="switch"` + `aria-checked` preserved. | `WidgetSelector.tsx`, `WidgetSelector.module.css` |
+| Export panel payoff | Panel header (EXPORT / Ship your theme). Chip-style tabs with label + `.ext` sub-line; active tab filled primary. Per-format one-line description. Download = primary filled CTA, Copy = secondary ghost. `data-testid="export-output"` preserved. | `ExportPanel.tsx`, `ExportPanel.module.css` |
+| App shell rhythm | Sidebar 280 → 300px. Topbar +4px height with hairline bottom border. Canvas gutter 24 → 28px. Import section bumped to 640px / 12px radius. | `App.module.css` |
+
+### Constraints honored
+
+- `ThemeConfigSchema` and all zod validators untouched.
+- `src/export/*` formatters untouched.
+- `src/lib/persistence/*` untouched.
+- `src/lib/theme/*` untouched.
+- No new component directories; Collapsible is a local helper in `ThemeEditor.tsx`.
+- Simple-mode color derivation deliberately deferred to the next batch.
+
+### Validation
+
+| Gate | Result |
+|---|---|
+| Lint | 0 errors |
+| Typecheck | pass |
+| Test | 267/267 pass (no new tests; all existing still green) |
+| Build | pass (vite ~111ms; 21.39kB CSS / 295.78kB JS) |
+| Preview | verified at 1440×2400 — Advanced collapsed by default, expands on click; widget badges render; export chips + CTA render; topbar contained |
+
+### Next recommended batch
+
+**Batch B — 2-color Simple mode + Advanced overrides (deferred).** Ship the deterministic derivation from Primary + Neutral (secondary = primary hue-shifted +40°; background / text / muted / hairline / inkSoft / surfaceInvert / onInvert derived from neutral via fixed L values). Persist `colorMode` + per-slot `colorOverrides` as optional fields on `PersistedRecord` (no `ThemeConfigSchema` change). Advanced stays fully available; auto/override state shown per slot. Back-compat: legacy records load as Simple with empty override map.
+
+---
+
 ## Batch 11 — Nit-pick cleanup (Batch 10 inspector findings)
 
 **Date:** 2026-04-16

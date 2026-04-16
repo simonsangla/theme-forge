@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { ThemeConfig } from '../../schema/theme'
 import {
   validateColorTokens,
@@ -59,6 +59,31 @@ function colorLabel(slot: typeof COLOR_SLOTS[number]): string {
   return slot
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/^./, c => c.toUpperCase())
+}
+
+/**
+ * Collapsible section — native <details>/<summary> so contents stay in the DOM
+ * for queries + a11y. Styled to match the existing `.sectionTitle` weight via
+ * matching CSS rules. `defaultOpen` is locked to the `open` attribute at mount.
+ */
+function Collapsible({
+  title,
+  defaultOpen,
+  children,
+}: {
+  title: string
+  defaultOpen: boolean
+  children: ReactNode
+}) {
+  return (
+    <details className={styles.collapsible} open={defaultOpen}>
+      <summary className={styles.summary}>
+        <span className={styles.summaryTitle}>{title}</span>
+        <span className={styles.summaryChevron} aria-hidden>▾</span>
+      </summary>
+      <div className={styles.collapsibleBody}>{children}</div>
+    </details>
+  )
 }
 
 export default function ThemeEditor({
@@ -208,9 +233,9 @@ export default function ThemeEditor({
 
   return (
     <div className={styles.editor}>
-      {/* ── Name ─────────────────────────────────────────────────────────── */}
+      {/* ── Identity (name + presets) ────────────────────────────────────── */}
       <section className={styles.section}>
-        <p className={styles.sectionTitle}>Theme name</p>
+        <p className={styles.sectionTitle}>Identity</p>
         <label className={styles.stackField}>
           <input
             className={styles.textInput}
@@ -219,9 +244,29 @@ export default function ThemeEditor({
             key={theme.name}
             onChange={handleName}
             placeholder="Theme name"
+            aria-label="Theme name"
           />
           {errors.name && <span className={styles.error}>{errors.name}</span>}
         </label>
+
+        <p className={styles.subsectionTitle}>Presets</p>
+        <div className={styles.presetGrid}>
+          {PRESETS.map(({ label, theme: preset }) => (
+            <button
+              key={label}
+              type="button"
+              className={styles.presetBtn}
+              onClick={() => onPresetApply(preset)}
+              style={{ borderColor: preset.colors.primary }}
+            >
+              <span
+                className={styles.presetSwatch}
+                style={{ background: preset.colors.primary }}
+              />
+              {label}
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* ── Colors (9 slots) ─────────────────────────────────────────────── */}
@@ -237,6 +282,7 @@ export default function ThemeEditor({
                   value={hexDraft[slot]}
                   onChange={handleColorPicker(slot)}
                   className={styles.colorPicker}
+                  aria-label={`${colorLabel(slot)} color picker`}
                 />
                 <input
                   type="text"
@@ -245,6 +291,7 @@ export default function ThemeEditor({
                   className={styles.hexText}
                   maxLength={7}
                   spellCheck={false}
+                  aria-label={`${colorLabel(slot)} hex value`}
                 />
               </div>
             </label>
@@ -281,6 +328,7 @@ export default function ThemeEditor({
             value={theme.typography.baseSizePx}
             onChange={handleBaseSizePx}
             className={styles.range}
+            aria-label="Base font size"
           />
         </label>
         {errors.baseSizePx && <span className={styles.error}>{errors.baseSizePx}</span>}
@@ -295,6 +343,7 @@ export default function ThemeEditor({
             value={theme.typography.scaleRatio}
             onChange={handleScaleRatio}
             className={styles.range}
+            aria-label="Type scale ratio"
           />
         </label>
         {errors.scaleRatio && <span className={styles.error}>{errors.scaleRatio}</span>}
@@ -313,80 +362,64 @@ export default function ThemeEditor({
             value={theme.spacing.baseUnitPx}
             onChange={handleBaseUnit}
             className={styles.range}
+            aria-label="Base spacing unit"
           />
         </label>
         {errors.baseUnitPx && <span className={styles.error}>{errors.baseUnitPx}</span>}
       </section>
 
-      {/* ── Shadows (T-125, 4 named CSS box-shadow strings) ──────────────── */}
-      <section className={styles.section}>
-        <p className={styles.sectionTitle}>Shadows</p>
-        {SHADOW_SLOTS.map(slot => {
-          const errKey = `shadow-${slot}` as const
-          return (
-            <div key={slot} className={styles.shadowRow}>
-              <label className={styles.stackField}>
-                <span className={styles.slotLabel}>{slot.charAt(0).toUpperCase() + slot.slice(1)}</span>
-                <textarea
-                  className={styles.shadowTextarea}
-                  value={shadowDraft[slot]}
-                  onChange={handleShadow(slot)}
-                  rows={2}
-                  spellCheck={false}
-                />
-              </label>
-              {errors[errKey] && <span className={styles.error}>{errors[errKey]}</span>}
-            </div>
-          )
-        })}
-      </section>
-
-      {/* ── Radii (T-126, 5 numeric pixel slots) ─────────────────────────── */}
-      <section className={styles.section}>
-        <p className={styles.sectionTitle}>Radii</p>
-        {RADIUS_SLOTS.map(slot => {
-          const errKey = `radius-${slot}` as const
-          return (
-            <div key={slot} className={styles.radiusRow}>
-              <label className={styles.field}>
-                <span className={styles.slotLabel}>{slot}</span>
-                <input
-                  type="number"
-                  className={styles.radiusInput}
-                  value={radiusDraft[slot]}
-                  onChange={handleRadius(slot)}
-                  min={0}
-                  max={9999}
-                  step={1}
-                />
-              </label>
-              {errors[errKey] && <span className={styles.error}>{errors[errKey]}</span>}
-            </div>
-          )
-        })}
-      </section>
-
-      {/* ── Presets ──────────────────────────────────────────────────────── */}
-      <section className={styles.section}>
-        <p className={styles.sectionTitle}>Presets</p>
-        <div className={styles.presetGrid}>
-          {PRESETS.map(({ label, theme: preset }) => (
-            <button
-              key={label}
-              type="button"
-              className={styles.presetBtn}
-              onClick={() => onPresetApply(preset)}
-              style={{ borderColor: preset.colors.primary }}
-            >
-              <span
-                className={styles.presetSwatch}
-                style={{ background: preset.colors.primary }}
-              />
-              {label}
-            </button>
-          ))}
+      {/* ── Advanced (collapsible, closed by default) ────────────────────── */}
+      <Collapsible title="Advanced" defaultOpen={false}>
+        {/* Shadows (T-125, 4 named CSS box-shadow strings) */}
+        <div className={styles.advancedGroup}>
+          <p className={styles.subsectionTitle}>Shadows</p>
+          {SHADOW_SLOTS.map(slot => {
+            const errKey = `shadow-${slot}` as const
+            return (
+              <div key={slot} className={styles.shadowRow}>
+                <label className={styles.stackField}>
+                  <span className={styles.slotLabel}>{slot.charAt(0).toUpperCase() + slot.slice(1)}</span>
+                  <textarea
+                    className={styles.shadowTextarea}
+                    value={shadowDraft[slot]}
+                    onChange={handleShadow(slot)}
+                    rows={2}
+                    spellCheck={false}
+                    aria-label={`${slot} shadow`}
+                  />
+                </label>
+                {errors[errKey] && <span className={styles.error}>{errors[errKey]}</span>}
+              </div>
+            )
+          })}
         </div>
-      </section>
+
+        {/* Radii (T-126, 5 numeric pixel slots) */}
+        <div className={styles.advancedGroup}>
+          <p className={styles.subsectionTitle}>Radii</p>
+          {RADIUS_SLOTS.map(slot => {
+            const errKey = `radius-${slot}` as const
+            return (
+              <div key={slot} className={styles.radiusRow}>
+                <label className={styles.field}>
+                  <span className={styles.slotLabel}>{slot}</span>
+                  <input
+                    type="number"
+                    className={styles.radiusInput}
+                    value={radiusDraft[slot]}
+                    onChange={handleRadius(slot)}
+                    min={0}
+                    max={9999}
+                    step={1}
+                    aria-label={`${slot} radius`}
+                  />
+                </label>
+                {errors[errKey] && <span className={styles.error}>{errors[errKey]}</span>}
+              </div>
+            )
+          })}
+        </div>
+      </Collapsible>
 
       {/* ── Actions ──────────────────────────────────────────────────────── */}
       <section className={styles.section}>

@@ -1,16 +1,16 @@
 .section {
   background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  padding: 16px;
-  max-width: 600px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 640px;
 }
 
 .header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .title {
@@ -19,7 +19,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #888;
+  color: #555;
 }
 
 .count {
@@ -70,26 +70,26 @@
 }
 
 .cardBtn {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   width: 100%;
   gap: 8px;
   padding: 10px;
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
+  background: #fff;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
-  transition: border-color 0.1s, background 0.1s, opacity 0.1s, box-shadow 0.1s;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
   font: inherit;
   color: inherit;
   text-align: left;
-  opacity: 0.55;
 }
 
 .cardBtn:hover:not(:disabled) {
-  border-color: #bbb;
-  opacity: 0.85;
+  border-color: var(--color-primary, #6366f1);
+  transform: translateY(-1px);
 }
 
 .cardBtn:focus-visible {
@@ -98,10 +98,25 @@
 }
 
 .cardSelected {
-  opacity: 1;
-  background: #fff;
   border-color: var(--color-primary, #6366f1);
-  box-shadow: 0 0 0 1px var(--color-primary, #6366f1);
+  box-shadow: 0 0 0 1px var(--color-primary, #6366f1), 0 4px 10px -6px rgba(15, 23, 42, 0.2);
+}
+
+/* Check badge — decorative; the button's role="switch" + aria-checked conveys state. */
+.selectedBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary, #6366f1);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px #fff;
+  pointer-events: none;
 }
 
 .cardPreview {

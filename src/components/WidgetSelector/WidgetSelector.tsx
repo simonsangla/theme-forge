@@ -91,6 +91,13 @@ export default function WidgetSelector({ selection, onChange }: Props) {
                 className={`${styles.cardBtn} ${checked ? styles.cardSelected : ''}`}
                 onClick={() => toggle(id)}
               >
+                {checked && (
+                  <span className={styles.selectedBadge} aria-hidden>
+                    <svg viewBox="0 0 12 12" width="10" height="10">
+                      <path d="M2.5 6.2 L5 8.5 L9.5 3.8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                )}
                 <span className={styles.cardPreview}>
                   <WidgetPreview widget={id} variant={id === 'kpi-tile' ? kpiVariant : undefined} />
                 </span>
